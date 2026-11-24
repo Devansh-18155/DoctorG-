@@ -15,10 +15,18 @@ import {
   Calendar,
   X,
   ArrowRight,
+  MapPin,
+  Phone,
+  Navigation,
 } from 'lucide-react';
 import { DIAGNOSTIC_TESTS } from '../../data/mockData';
 import { DiagnosticTest, TestBooking } from '../../types';
 import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
+import { VERIFIED_DIAGNOSTIC_LABS } from '../../data/labCatalogData';
+import {
+  LiveRouteNavigationModal,
+  NavigationTarget,
+} from '../../components/navigation/LiveRouteNavigationModal';
 
 export const MedicalCheckupScreen: React.FC = () => {
   const {
@@ -45,6 +53,28 @@ export const MedicalCheckupScreen: React.FC = () => {
 
   // Active Report Modal
   const [viewingReport, setViewingReport] = useState<any>(null);
+
+  // Live Navigation Modal
+  const [navTarget, setNavTarget] = useState<NavigationTarget | null>(null);
+  const [isNavModalOpen, setIsNavModalOpen] = useState<boolean>(false);
+
+  const handleOpenLiveNavigation = (lab: any) => {
+    setNavTarget({
+      id: lab.id,
+      name: lab.name,
+      specialty: 'Diagnostic Laboratory & Pathology Center',
+      type: 'Laboratory',
+      address: lab.address,
+      city: lab.city,
+      area: lab.area,
+      latitude: lab.coordinates.lat,
+      longitude: lab.coordinates.lng,
+      coordinates: lab.coordinates,
+      phone: lab.phone,
+      imageUrl: lab.imageUrl,
+    });
+    setIsNavModalOpen(true);
+  };
 
   const categories = [
     'All',
@@ -149,46 +179,119 @@ export const MedicalCheckupScreen: React.FC = () => {
 
             {/* Test Cards */}
             <div className="space-y-3">
-              {filteredTests.map((test) => (
-                <div
-                  key={test.id}
-                  onClick={() => {
-                    setSelectedTest(test);
-                    setActiveTab('details');
-                  }}
-                  className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md cursor-pointer transition-all"
-                >
-                  <div className="flex items-start justify-between pb-2 border-b border-slate-100">
-                    <div>
-                      <span className="text-[9px] font-bold bg-sky-50 text-sky-700 px-1.5 py-0.2 rounded">
-                        {test.category}
-                      </span>
-                      <h4 className="font-bold text-xs text-[#172B4D] mt-1">{test.name}</h4>
-                      <p className="text-[11px] text-slate-500 mt-0.5">{test.shortDescription}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-extrabold text-[#172B4D]">₹{test.price}</span>
-                      <span className="text-[10px] text-slate-400 line-through block">
-                        ₹{test.mrp}
-                      </span>
-                    </div>
-                  </div>
+              {filteredTests.map((test) => {
+                const matchingLab =
+                  VERIFIED_DIAGNOSTIC_LABS.find(
+                    (l) =>
+                      test.labName.toLowerCase().includes(l.network.toLowerCase()) ||
+                      test.labName.toLowerCase().includes(l.name.toLowerCase()) ||
+                      l.name.toLowerCase().includes(test.labName.toLowerCase())
+                  ) || VERIFIED_DIAGNOSTIC_LABS[0];
 
-                  <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500">
-                    <span>🧪 {test.sampleType}</span>
-                    <span className="text-emerald-600 font-medium">
-                      ⏱ Report in {test.reportTimeHours}h
-                    </span>
-                  </div>
+                return (
+                  <div
+                    key={test.id}
+                    className="bg-white p-3.5 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-2.5"
+                  >
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setSelectedTest(test);
+                        setActiveTab('details');
+                      }}
+                    >
+                      <div className="flex items-start justify-between pb-2 border-b border-slate-100">
+                        <div>
+                          <span className="text-[9px] font-bold bg-sky-50 text-sky-700 px-1.5 py-0.2 rounded">
+                            {test.category}
+                          </span>
+                          <h4 className="font-bold text-xs text-[#172B4D] mt-1">{test.name}</h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{test.shortDescription}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-xs font-extrabold text-[#172B4D]">₹{test.price}</span>
+                          <span className="text-[10px] text-slate-400 line-through block">
+                            ₹{test.mrp}
+                          </span>
+                        </div>
+                      </div>
 
-                  <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-[10px] text-slate-400">{test.labName}</span>
-                    <span className="font-bold text-[#087E8B] flex items-center gap-0.5">
-                      Book Test <ArrowRight className="w-3.5 h-3.5" />
-                    </span>
+                      <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>🧪 {test.sampleType}</span>
+                        <span className="text-emerald-600 font-medium">
+                          ⏱ Report in {test.reportTimeHours}h
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Laboratory Information Section */}
+                    <div className="pt-2 border-t border-slate-100 bg-slate-50/80 -mx-3.5 -mb-3.5 p-3 rounded-b-2xl space-y-2 text-xs">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-bold text-teal-800 bg-teal-100/70 px-1.5 py-0.5 rounded">
+                            {matchingLab.network}
+                          </span>
+                          <span className="text-[9px] font-bold text-slate-700 bg-white border border-slate-200 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                            <ShieldCheck className="w-2.5 h-2.5 text-[#087E8B]" />
+                            NABL Certified
+                          </span>
+                        </div>
+                        <h5 className="font-extrabold text-xs text-[#172B4D] mt-1">
+                          {matchingLab.name}
+                        </h5>
+                        <p className="text-[11px] text-slate-500 font-medium flex items-start gap-1 mt-0.5 leading-tight">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                          <span>{matchingLab.address}, {matchingLab.area}, {matchingLab.city}</span>
+                        </p>
+                      </div>
+
+                      {/* Timings and Distance */}
+                      <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-200/60 flex-wrap gap-2">
+                        <div className="flex items-center gap-1 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                          <span>Open {matchingLab.openingTime} – Closes {matchingLab.closingTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1 font-bold text-[#172B4D]">
+                          <Navigation className="w-3.5 h-3.5 text-[#087E8B] flex-shrink-0" />
+                          <span>2.4 km away</span>
+                        </div>
+                      </div>
+
+                      {/* Call & View Location Actions */}
+                      <div className="flex items-center gap-2 pt-0.5">
+                        <a
+                          href={`tel:${matchingLab.phone.replace(/\s+/g, '')}`}
+                          className="flex-1 py-1.5 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                        >
+                          <Phone className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                          <span className="truncate">{matchingLab.phone}</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenLiveNavigation(matchingLab)}
+                          className="flex-1 py-1.5 px-2.5 rounded-xl border border-[#087E8B]/40 bg-[#087E8B]/10 hover:bg-[#087E8B]/20 text-[#087E8B] text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                        >
+                          <Navigation className="w-3.5 h-3.5 text-[#087E8B] flex-shrink-0" />
+                          <span>View Location</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedTest(test);
+                            setActiveTab('booking');
+                          }}
+                          className="py-1.5 px-3 rounded-xl bg-[#087E8B] hover:bg-[#06626D] text-white text-[11px] font-extrabold flex items-center gap-1 shadow-2xs"
+                        >
+                          <span>Book</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -416,6 +519,13 @@ export const MedicalCheckupScreen: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Live Route Navigation Modal */}
+      <LiveRouteNavigationModal
+        isOpen={isNavModalOpen}
+        onClose={() => setIsNavModalOpen(false)}
+        target={navTarget}
+      />
     </div>
   );
 };

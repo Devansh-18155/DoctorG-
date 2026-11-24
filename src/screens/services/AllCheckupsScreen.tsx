@@ -115,6 +115,12 @@ export const AllCheckupsScreen: React.FC = () => {
   // City Picker Modal
   const [isCityPickerOpen, setIsCityPickerOpen] = useState<boolean>(false);
 
+  // Laboratory Selection per Test Card
+  const [selectedLabByTestId, setSelectedLabByTestId] = useState<Record<string, string>>({});
+  const [globalPreferredLabId, setGlobalPreferredLabId] = useState<string>('');
+  const [labChooserTestId, setLabChooserTestId] = useState<string | null>(null);
+  const [syncLabToAllTests, setSyncLabToAllTests] = useState<boolean>(true);
+
   const availableCities = [
     'Bhopal',
     'Indore',
@@ -235,6 +241,67 @@ export const AllCheckupsScreen: React.FC = () => {
     filterNablOnly,
     sortBy,
   ]);
+
+  // Comprehensive list of all enriched labs near user
+  const allEnrichedLabs = useMemo(() => {
+    return getLabsForSelectedTests(
+      currentCity,
+      currentArea,
+      LAB_TEST_CATALOG.map((t) => t.id),
+      liveCoordinates
+        ? { lat: liveCoordinates.latitude, lng: liveCoordinates.longitude }
+        : undefined
+    );
+  }, [currentCity, currentArea, liveCoordinates]);
+
+  // Helper to get available labs offering a specific test
+  const getLabsForTest = (testId: string): EnrichedLabWithPrice[] => {
+    const offering = allEnrichedLabs.filter((lab) => lab.offeredTestIds.includes(testId));
+    return offering.length > 0 ? offering : allEnrichedLabs;
+  };
+
+  // Helper to get the specific assigned lab for a test (maintains consistency across tests)
+  const getAssignedLabForTest = (testId: string): EnrichedLabWithPrice => {
+    const available = getLabsForTest(testId);
+    const assignedId = selectedLabByTestId[testId];
+    if (assignedId) {
+      const match = available.find((l) => l.id === assignedId);
+      if (match) return match;
+    }
+    if (globalPreferredLabId) {
+      const matchGlobal = available.find((l) => l.id === globalPreferredLabId);
+      if (matchGlobal) return matchGlobal;
+    }
+    return available[0] || allEnrichedLabs[0];
+  };
+
+  // Handle selecting a lab for a test card with optional synchronization across all selected tests
+  const handleSelectLabForTest = (testId: string, labId: string) => {
+    const lab = allEnrichedLabs.find((l) => l.id === labId);
+    if (!lab) return;
+
+    setSelectedLabByTestId((prev) => ({
+      ...prev,
+      [testId]: labId,
+    }));
+
+    if (syncLabToAllTests) {
+      setGlobalPreferredLabId(labId);
+      setSelectedLabByTestId((prev) => {
+        const updated = { ...prev };
+        selectedTestIds.forEach((id) => {
+          if (lab.offeredTestIds.includes(id)) {
+            updated[id] = labId;
+          }
+        });
+        return updated;
+      });
+      showToast(`Selected ${lab.name} for all tests`, 'success');
+    } else {
+      showToast(`Assigned ${lab.name} to test`, 'success');
+    }
+    setLabChooserTestId(null);
+  };
 
   // Set default lab for map preview when labs change
   useEffect(() => {
@@ -560,6 +627,8 @@ export const AllCheckupsScreen: React.FC = () => {
               const isSelected = selectedTestIds.includes(test.id);
               const isExpanded = expandedTestInfoId === test.id;
               const discount = Math.round(((test.mrp - test.basePrice) / test.mrp) * 100);
+              const availableLabs = getLabsForTest(test.id);
+              const assignedLab = getAssignedLabForTest(test.id);
 
               return (
                 <div
@@ -570,6 +639,7 @@ export const AllCheckupsScreen: React.FC = () => {
                       : 'border-slate-200/90'
                   }`}
                 >
+                  {/* Test Top Section: Name, Tags, Pricing & Added Button (Kept Exactly As Is) */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 cursor-pointer" onClick={() => toggleTestSelection(test.id)}>
                       <div className="flex items-center gap-2 flex-wrap mb-1">
@@ -640,26 +710,124 @@ export const AllCheckupsScreen: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Clinical info drawer toggle */}
-                  <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                    <button
-                      onClick={() => setExpandedTestInfoId(isExpanded ? null : test.id)}
-                      className="text-[11px] font-semibold text-[#087E8B] hover:underline flex items-center gap-1"
-                    >
-                      <Info className="w-3 h-3" />
-                      <span>{isExpanded ? 'Hide clinical significance' : 'Why this test is done'}</span>
-                    </button>
-                    <span className="text-[10px] text-slate-400">
-                      Standard Diagnostic Reference
-                    </span>
-                  </div>
+                  {/* ======================================================== */}
+                  {/* LABORATORY INFORMATION SECTION */}
+                  {/* ======================================================== */}
+                  <div className="mt-3 pt-2.5 border-t border-slate-100 bg-slate-50/80 -mx-3.5 -mb-3.5 p-3 rounded-b-2xl space-y-2">
+                    {/* Lab Header & Switcher Row */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-extrabold text-teal-800 bg-teal-100/70 px-1.5 py-0.5 rounded">
+                            {assignedLab.network}
+                          </span>
+                          {assignedLab.accreditation?.some((a) => a.includes('NABL')) && (
+                            <span className="text-[9px] font-bold text-slate-700 bg-white border border-slate-200 px-1.5 py-0.2 rounded flex items-center gap-0.5">
+                              <ShieldCheck className="w-2.5 h-2.5 text-[#087E8B]" />
+                              NABL Certified
+                            </span>
+                          )}
+                        </div>
 
-                  {isExpanded && (
-                    <div className="mt-2 p-2.5 bg-slate-50 rounded-xl text-xs text-slate-600 border border-slate-200/60 animate-fadeIn">
-                      <p className="font-bold text-slate-800 mb-0.5">Clinical Purpose:</p>
-                      <p>{test.clinicalSignificance}</p>
+                        {/* Laboratory Name */}
+                        <h4 className="font-extrabold text-xs text-[#172B4D] mt-1 leading-snug">
+                          {assignedLab.name}
+                        </h4>
+
+                        {/* Full Address */}
+                        <p className="text-[11px] text-slate-500 font-medium flex items-start gap-1 mt-0.5 leading-tight">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                          <span className="line-clamp-2">
+                            {assignedLab.address}, {assignedLab.area}, {assignedLab.city}
+                          </span>
+                        </p>
+                      </div>
+
+                      {/* Choose / Switch Lab Button */}
+                      {availableLabs.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLabChooserTestId(test.id);
+                          }}
+                          className="text-[10px] font-bold text-[#087E8B] hover:text-[#06626D] bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-2 py-1 rounded-lg flex items-center gap-1 flex-shrink-0 transition-colors shadow-2xs"
+                          title="View or choose other verified laboratories offering this test"
+                        >
+                          <SlidersHorizontal className="w-3 h-3" />
+                          <span>Change Lab ({availableLabs.length})</span>
+                        </button>
+                      )}
                     </div>
-                  )}
+
+                    {/* Operating Hours & Distance from User */}
+                    <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-200/60 text-[11px] text-slate-600 flex-wrap">
+                      {/* Operating Hours */}
+                      <div className="flex items-center gap-1 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />
+                        <span>Open {assignedLab.openingTime} – Closes {assignedLab.closingTime}</span>
+                      </div>
+
+                      {/* Distance from current location */}
+                      <div className="flex items-center gap-1 font-bold text-[#172B4D]">
+                        <Navigation className="w-3.5 h-3.5 text-[#087E8B] flex-shrink-0" />
+                        <span>{assignedLab.distanceStr}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions: Clickable Phone Number & View Location */}
+                    <div className="flex items-center gap-2 pt-0.5">
+                      {/* Clickable Phone Number with Call Button */}
+                      <a
+                        href={`tel:${assignedLab.phone.replace(/\s+/g, '')}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 py-1.5 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                        title={`Call ${assignedLab.name}`}
+                      >
+                        <Phone className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                        <span className="truncate">{assignedLab.phone}</span>
+                      </a>
+
+                      {/* View Location Button (interactive map & directions) */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenLiveNavigation(assignedLab);
+                        }}
+                        className="flex-1 py-1.5 px-2.5 rounded-xl border border-[#087E8B]/40 bg-[#087E8B]/10 hover:bg-[#087E8B]/20 text-[#087E8B] text-[11px] font-extrabold flex items-center justify-center gap-1.5 transition-colors shadow-2xs"
+                        title="Open laboratory on interactive map with driving route"
+                      >
+                        <Navigation className="w-3.5 h-3.5 text-[#087E8B] flex-shrink-0" />
+                        <span>View Location</span>
+                      </button>
+                    </div>
+
+                    {/* Clinical info drawer toggle */}
+                    <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setExpandedTestInfoId(isExpanded ? null : test.id);
+                        }}
+                        className="text-[11px] font-semibold text-[#087E8B] hover:underline flex items-center gap-1"
+                      >
+                        <Info className="w-3 h-3" />
+                        <span>{isExpanded ? 'Hide clinical significance' : 'Why this test is done'}</span>
+                      </button>
+                      <span className="text-[10px] text-slate-400">
+                        Verified Diagnostic Center
+                      </span>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="p-2 bg-white rounded-xl text-xs text-slate-600 border border-slate-200 animate-fadeIn">
+                        <p className="font-bold text-slate-800 mb-0.5">Clinical Purpose:</p>
+                        <p>{test.clinicalSignificance}</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -1761,6 +1929,161 @@ export const AllCheckupsScreen: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* LAB CHOOSER MODAL FOR SPECIFIC TEST */}
+      {/* ========================================================================= */}
+      {labChooserTestId && (() => {
+        const targetTest = LAB_TEST_CATALOG.find((t) => t.id === labChooserTestId);
+        const availableLabs = getLabsForTest(labChooserTestId);
+        const currentAssigned = getAssignedLabForTest(labChooserTestId);
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+              {/* Modal Header */}
+              <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Choose Laboratory
+                  </span>
+                  <h3 className="font-extrabold text-sm text-[#172B4D] mt-1 leading-snug">
+                    {targetTest?.name}
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    {availableLabs.length} verified laboratories near {currentCity} offer this test
+                  </p>
+                </div>
+                <button
+                  onClick={() => setLabChooserTestId(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Consistency Checkbox */}
+              <div className="px-4 py-2.5 bg-teal-50/70 border-b border-teal-100 flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="syncLab"
+                  checked={syncLabToAllTests}
+                  onChange={(e) => setSyncLabToAllTests(e.target.checked)}
+                  className="rounded text-[#087E8B] focus:ring-[#087E8B] w-4 h-4 cursor-pointer"
+                />
+                <label htmlFor="syncLab" className="text-xs font-bold text-[#172B4D] cursor-pointer">
+                  Apply chosen laboratory to all my selected tests (consistent booking)
+                </label>
+              </div>
+
+              {/* Labs List */}
+              <div className="p-4 overflow-y-auto flex-1 space-y-3">
+                {availableLabs.map((lab) => {
+                  const isCurrentlySelected = currentAssigned.id === lab.id;
+                  const priceForThisTest = targetTest
+                    ? Math.round(targetTest.basePrice * lab.priceMultiplier)
+                    : 300;
+
+                  return (
+                    <div
+                      key={lab.id}
+                      className={`p-3.5 rounded-2xl border transition-all space-y-2.5 ${
+                        isCurrentlySelected
+                          ? 'border-[#087E8B] bg-teal-50/30 ring-2 ring-[#087E8B]/20'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[10px] font-extrabold text-teal-800 bg-teal-100/70 px-1.5 py-0.5 rounded">
+                              {lab.network}
+                            </span>
+                            {lab.accreditation.slice(0, 2).map((acc) => (
+                              <span
+                                key={acc}
+                                className="text-[9px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.2 rounded"
+                              >
+                                {acc}
+                              </span>
+                            ))}
+                          </div>
+
+                          <h4 className="font-extrabold text-xs text-[#172B4D] mt-1 leading-snug">
+                            {lab.name}
+                          </h4>
+
+                          {/* Full Address */}
+                          <p className="text-[11px] text-slate-500 font-medium flex items-start gap-1 mt-0.5">
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0 mt-0.5" />
+                            <span>{lab.address}, {lab.area}, {lab.city}</span>
+                          </p>
+                        </div>
+
+                        {/* Rating & Price */}
+                        <div className="text-right flex-shrink-0">
+                          <div className="flex items-center gap-1 justify-end font-bold text-xs text-amber-600">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>{lab.rating}</span>
+                            <span className="text-[10px] text-slate-400 font-normal">({lab.reviewCount})</span>
+                          </div>
+                          <span className="font-extrabold text-sm text-[#087E8B] block mt-1">
+                            ₹{priceForThisTest}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Hours & Distance */}
+                      <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1.5 border-t border-slate-100 flex-wrap gap-2">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-amber-500" />
+                          <span>Open {lab.openingTime} – Closes {lab.closingTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1 font-bold text-[#172B4D]">
+                          <Navigation className="w-3 h-3 text-[#087E8B]" />
+                          <span>{lab.distanceStr}</span>
+                        </div>
+                      </div>
+
+                      {/* Actions: Call, View Location, Select Lab */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <a
+                          href={`tel:${lab.phone.replace(/\s+/g, '')}`}
+                          className="py-1.5 px-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold flex items-center gap-1"
+                        >
+                          <Phone className="w-3 h-3 text-emerald-600" />
+                          <span>{lab.phone}</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenLiveNavigation(lab)}
+                          className="py-1.5 px-2.5 rounded-xl border border-teal-200 bg-teal-50 hover:bg-teal-100 text-[#087E8B] text-[11px] font-bold flex items-center gap-1"
+                        >
+                          <Navigation className="w-3 h-3" />
+                          <span>View Location</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSelectLabForTest(labChooserTestId, lab.id)}
+                          className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                            isCurrentlySelected
+                              ? 'bg-slate-200 text-slate-700 cursor-default'
+                              : 'bg-[#087E8B] hover:bg-[#076d78] text-white shadow-2xs'
+                          }`}
+                        >
+                          {isCurrentlySelected ? 'Selected' : 'Select Lab'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ========================================================================= */}
       {/* CITY PICKER MODAL */}
