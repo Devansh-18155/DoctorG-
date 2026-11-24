@@ -137,13 +137,14 @@ export const AllCheckupsScreen: React.FC = () => {
   const categories = [
     'All Tests',
     'Blood Tests',
-    'Diabetes',
+    'Heart Tests',
     'Thyroid',
     'Liver',
     'Kidney',
-    'Heart Health',
+    'Diabetes',
     'Vitamins',
     'Urine Tests',
+    'Bone Tests',
   ];
 
   // Filtered Tests for Step 1
@@ -1133,10 +1134,10 @@ export const AllCheckupsScreen: React.FC = () => {
                             {lab.name}
                           </h3>
 
-                          {/* Address & Locality */}
+                          {/* Full Address: Locality and City */}
                           <p className="text-xs text-slate-500 font-medium mt-0.5 flex items-center gap-1">
                             <MapPin className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                            <span>{lab.address}, {lab.area}</span>
+                            <span>{lab.address}, {lab.area}, {lab.city}</span>
                           </p>
                         </div>
                       </div>
@@ -1241,9 +1242,10 @@ export const AllCheckupsScreen: React.FC = () => {
                       <a
                         href={`tel:${lab.phone.replace(/\s+/g, '')}`}
                         className="px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        title={`Call ${lab.phone}`}
                       >
                         <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Call Lab</span>
+                        <span>Call ({lab.phone})</span>
                       </a>
 
                       <button

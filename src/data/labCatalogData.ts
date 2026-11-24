@@ -6,13 +6,14 @@ export interface LabTestItem {
   shortName: string;
   category:
     | 'Blood Tests'
-    | 'Diabetes'
+    | 'Heart Tests'
     | 'Thyroid'
     | 'Liver'
     | 'Kidney'
-    | 'Heart Health'
+    | 'Diabetes'
     | 'Vitamins'
-    | 'Urine Tests';
+    | 'Urine Tests'
+    | 'Bone Tests';
   sampleType: 'Blood' | 'Urine' | 'ECG' | 'Swab';
   fastingRequired: boolean;
   fastingHours?: number;
@@ -301,12 +302,12 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     clinicalSignificance: 'Screens for gout, joint arthritis pain, and kidney stone risk.',
   },
 
-  // --- HEART HEALTH ---
+  // --- HEART TESTS ---
   {
     id: 'test-lipid',
     name: 'Lipid Profile Complete (Cholesterol Panel)',
     shortName: 'Lipid Profile',
-    category: 'Heart Health',
+    category: 'Heart Tests',
     sampleType: 'Blood',
     fastingRequired: true,
     fastingHours: 12,
@@ -320,7 +321,7 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     id: 'test-ecg',
     name: '12-Lead Electrocardiogram (ECG)',
     shortName: '12-Lead ECG',
-    category: 'Heart Health',
+    category: 'Heart Tests',
     sampleType: 'ECG',
     fastingRequired: false,
     reportTurnaroundHours: 1,
@@ -333,7 +334,7 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     id: 'test-hscrp',
     name: 'High Sensitivity C-Reactive Protein (hs-CRP)',
     shortName: 'hs-CRP (Cardiac Risk)',
-    category: 'Heart Health',
+    category: 'Heart Tests',
     sampleType: 'Blood',
     fastingRequired: false,
     reportTurnaroundHours: 8,
@@ -399,6 +400,49 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     description: 'Identifies bacterial growth in urine and tests which antibiotics work effectively.',
     clinicalSignificance: 'Guides targeted antibiotic treatment for recurrent or stubborn UTIs.',
   },
+
+  // --- BONE TESTS ---
+  {
+    id: 'test-calcium',
+    name: 'Calcium Total (Serum)',
+    shortName: 'Serum Calcium',
+    category: 'Bone Tests',
+    sampleType: 'Blood',
+    fastingRequired: false,
+    reportTurnaroundHours: 4,
+    basePrice: 180,
+    mrp: 280,
+    description: 'Measures total circulating calcium essential for bone density, muscular function, and teeth strength.',
+    clinicalSignificance: 'Diagnoses osteoporosis, bone pain, parathyroid disorders, and calcium deficiencies.',
+  },
+  {
+    id: 'test-phosphorus',
+    name: 'Inorganic Phosphorus / Phosphate',
+    shortName: 'Serum Phosphorus',
+    category: 'Bone Tests',
+    sampleType: 'Blood',
+    fastingRequired: true,
+    fastingHours: 8,
+    reportTurnaroundHours: 4,
+    basePrice: 200,
+    mrp: 320,
+    description: 'Assesses blood phosphate level critical for mineralizing bone matrix with calcium.',
+    clinicalSignificance: 'Evaluates bone diseases, healing fractures, rickets, and renal bone metabolism.',
+  },
+  {
+    id: 'test-bone-profile',
+    name: 'Complete Bone Health Profile (Calcium, Phosphorus & Alk Phosphatase)',
+    shortName: 'Bone Health Panel',
+    category: 'Bone Tests',
+    sampleType: 'Blood',
+    fastingRequired: true,
+    fastingHours: 8,
+    reportTurnaroundHours: 6,
+    basePrice: 590,
+    mrp: 990,
+    description: 'Comprehensive panel measuring Calcium, Phosphorus, Alkaline Phosphatase (ALP) & Uric Acid.',
+    clinicalSignificance: 'Screening for arthritis, osteoporosis, osteopenia, joint inflammation, and bone fractures.',
+  },
 ];
 
 // 2. REAL & VERIFIED DIAGNOSTIC LABORATORIES ACROSS INDIA
@@ -433,6 +477,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.0,
     about: 'India’s most trusted diagnostic chain with 75+ years legacy, advanced robotics, and automated barcoding.',
@@ -467,6 +512,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 0.98,
     about: 'Largest diagnostic laboratory network in India offering 4-hour smart digital reports on WhatsApp & App.',
@@ -499,7 +545,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lft', 'test-sgpt', 'test-sgot',
       'test-kft', 'test-creatinine', 'test-uric-acid',
       'test-lipid', 'test-vit-b12', 'test-vit-d',
-      'test-urine-routine',
+      'test-urine-routine', 'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 0.92,
     about: 'High throughput fully automated central processing lab with subsidized pricing across Sehore & Ashta.',
@@ -534,6 +580,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.02,
     about: 'Equipped with dry chemistry analyzers and expert MD Pathologist verification on all critical values.',
@@ -569,6 +616,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.0,
     about: 'Multinational chain providing precision molecular diagnostics and vacuum sample tube technology.',
@@ -638,6 +686,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.0,
     about: 'Apex reference laboratory in northern India with fully automated tracks processing 50,000 samples daily.',
@@ -672,6 +721,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.05,
     about: 'Integrated diagnostic network of Max Healthcare, known for critical emergency and cardiac evaluations.',
@@ -707,6 +757,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 0.98,
     about: 'Certified eastern reference lab with direct courier and temperature-controlled collection units.',
@@ -743,6 +794,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.0,
     about: 'Flagship research center handling international samples with automated barcode tracking.',
@@ -779,6 +831,7 @@ export const VERIFIED_DIAGNOSTIC_LABS: DiagnosticLab[] = [
       'test-lipid', 'test-ecg', 'test-hscrp',
       'test-vit-b12', 'test-vit-d',
       'test-urine-routine', 'test-urine-culture',
+      'test-calcium', 'test-phosphorus', 'test-bone-profile',
     ],
     priceMultiplier: 1.0,
     about: 'Karnataka’s most reputed automated clinical laboratory with dedicated phlebotomy experts.',

@@ -96,7 +96,7 @@ export const HomeScreen: React.FC = () => {
     {
       id: 'all-checkups',
       title: t('allCheckups') || 'All Checkups',
-      subtitle: 'Complete Packages',
+      subtitle: 'Diagnostics & Lab Tests',
       icon: PackagePlus,
       bgGradient: 'from-indigo-50 to-purple-50',
       iconColor: 'text-indigo-700',
