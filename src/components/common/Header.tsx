@@ -35,27 +35,19 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
     <div className="bg-white border-b border-slate-100 px-4 pt-3 pb-3 sticky top-0 z-30 shadow-xs">
       {/* Top row: Brand + Emergency SOS + Language + Notifications + Avatar */}
       <div className="flex items-center justify-between gap-2">
-        {/* Brand & Logo */}
+        {/* Brand & Logo - Official Doctor G Brand Logo */}
         <div
           onClick={() => navigateTo('home')}
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center gap-1.5 cursor-pointer group select-none"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#087E8B] to-[#06626D] flex items-center justify-center text-white shadow-sm shadow-teal-500/20 group-hover:scale-105 transition-transform">
-            <span className="font-extrabold text-lg tracking-tighter">G+</span>
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-base text-[#172B4D] tracking-tight leading-tight">
-                Doctor G
-              </span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-semibold px-1.5 py-0.2 rounded-full">
-                Live
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-500 font-medium leading-none">
-              Your Healthcare Partner
-            </p>
-          </div>
+          <img
+            src="/doctor-g-logo.jpg"
+            alt="Doctor G - Your Healthcare Partner"
+            className="h-10 sm:h-11 w-auto max-w-[140px] object-contain rounded-lg group-hover:scale-102 transition-transform"
+          />
+          <span className="bg-emerald-100 text-emerald-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full flex-shrink-0 self-center">
+            Live
+          </span>
         </div>
 
         {/* Action icons */}
