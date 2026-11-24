@@ -9,6 +9,8 @@ import {
   ShieldCheck,
   Globe,
   Sparkles,
+  FlaskConical,
+  Store,
 } from 'lucide-react';
 import { SUPPORTED_LANGUAGES } from '../../translations';
 
@@ -88,6 +90,36 @@ export const DevTopBar: React.FC = () => {
             >
               <Building2 className="w-3.5 h-3.5" />
               <span>Hospital Panel</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentRole('laboratory');
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all font-medium ${
+                currentRole === 'laboratory'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Diagnostic Laboratory Portal"
+            >
+              <FlaskConical className="w-3.5 h-3.5" />
+              <span>Lab Portal</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentRole('medical_shop');
+              }}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition-all font-medium ${
+                currentRole === 'medical_shop'
+                  ? 'bg-teal-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Medical Shop / Pharmacy Portal"
+            >
+              <Store className="w-3.5 h-3.5" />
+              <span>Pharmacy</span>
             </button>
 
             <button

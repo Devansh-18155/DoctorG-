@@ -47,6 +47,8 @@ import { DoctorServicesScreen } from './screens/doctor/DoctorServicesScreen';
 import { DoctorDashboard } from './screens/doctor/DoctorDashboard';
 import { HospitalDashboard } from './screens/hospital/HospitalDashboard';
 import { AdminDashboard } from './screens/admin/AdminDashboard';
+import { LaboratoryDashboard } from './screens/laboratory/LaboratoryDashboard';
+import { MedicalShopDashboard } from './screens/pharmacy/MedicalShopDashboard';
 
 export const App: React.FC = () => {
   const { currentRole, viewportMode, currentScreen } = useApp();
@@ -81,6 +83,30 @@ export const App: React.FC = () => {
       <div className="min-h-screen flex flex-col font-sans">
         <DevTopBar />
         <AdminDashboard />
+        <ToastContainer />
+        <ConfirmModal />
+      </div>
+    );
+  }
+
+  // If Diagnostic Laboratory Portal
+  if (currentRole === 'laboratory') {
+    return (
+      <div className="min-h-screen flex flex-col font-sans">
+        <DevTopBar />
+        <LaboratoryDashboard />
+        <ToastContainer />
+        <ConfirmModal />
+      </div>
+    );
+  }
+
+  // If Medical Shop / Pharmacy Portal
+  if (currentRole === 'medical_shop') {
+    return (
+      <div className="min-h-screen flex flex-col font-sans">
+        <DevTopBar />
+        <MedicalShopDashboard />
         <ToastContainer />
         <ConfirmModal />
       </div>

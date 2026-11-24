@@ -29,13 +29,32 @@ import { DoctorLocationPicker } from '../../components/doctor/DoctorLocationPick
 import { CLINIC_COORDINATES } from '../../utils/doctorDiscoveryHelper';
 import { ALL_SPECIALIZATIONS, CITIES_DATA } from '../../data/cityData';
 import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
+import { subscribeToLiveBookings } from '../../services/supabaseClient';
 
 export const AdminDashboard: React.FC = () => {
-  const { loginAsPatient, showToast } = useApp();
+  const { loginAsPatient, showToast, appointments, testBookings, updateAppointmentStatus } = useApp();
 
   const [activeTab, setActiveTab] = useState<
     'overview' | 'verifications' | 'doctors' | 'providers' | 'appointments'
   >('overview');
+
+  const [appointmentStatusFilter, setAppointmentStatusFilter] = useState<
+    'ALL' | 'UPCOMING' | 'COMPLETED' | 'CANCELLED'
+  >('ALL');
+
+  // Listen to live booking events from Supabase Realtime
+  React.useEffect(() => {
+    const sub = subscribeToLiveBookings((newBooking) => {
+      showToast(`Realtime Alert: New booking from ${newBooking.patient_name || 'Patient'}`, 'info');
+    });
+    return () => sub.unsubscribe();
+  }, []);
+
+  // Filtered Appointments for Live Bookings Stream
+  const filteredAppointments = appointments.filter((apt) => {
+    if (appointmentStatusFilter === 'ALL') return true;
+    return apt.bookingStatus === appointmentStatusFilter;
+  });
 
   // Verification Queue State with Approve/Reject actions
   const [pendingVerifications, setPendingVerifications] = useState([
@@ -494,6 +513,189 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-xs font-bold text-emerald-400">Active Licensed</span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center">
+                  <Calendar className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-slate-400">Total System Bookings</span>
+                  <h4 className="text-xl font-black text-white">{appointments.length + (testBookings?.length || 0)}</h4>
+                  <p className="text-[11px] text-emerald-400">Consultations & Diagnostics</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                  <DollarSign className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-slate-400">Gross Platform Revenue</span>
+                  <h4 className="text-xl font-black text-white">
+                    ₹{appointments.reduce((sum, a) => sum + (a.fee || 750), 0) + (testBookings?.length || 0) * 850}
+                  </h4>
+                  <p className="text-[11px] text-purple-400">Razorpay Verified Settlements</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-slate-400">Realtime Queue Live</span>
+                  <h4 className="text-xl font-black text-white">
+                    {appointments.filter((a) => a.bookingStatus === 'UPCOMING').length} Active
+                  </h4>
+                  <p className="text-[11px] text-emerald-400">OPD live patient monitoring</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Architecture Health */}
+            <div className="bg-slate-800/60 rounded-3xl border border-slate-700/80 p-6 space-y-4">
+              <h3 className="font-extrabold text-sm text-white">Production System Integrations & Health</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">Supabase Auth & DB</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">22 Relational Tables with RLS</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">Razorpay Gateway</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Server Order & Signature Verify</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">Google Maps GIS</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Haversine & Real Routes</p>
+                </div>
+
+                <div className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white">Google Calendar API</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Doctor Availability Sync</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LIVE BOOKINGS STREAM TAB */}
+        {activeTab === 'appointments' && (
+          <div className="bg-slate-800/60 rounded-3xl border border-slate-700/80 p-6 space-y-4 animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Live Booking Feed & Consultation Stream</span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Realtime patient consultation slips, diagnostic test orders & queue tokens
+                </p>
+              </div>
+
+              {/* Status Filter Buttons */}
+              <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl">
+                {(['ALL', 'UPCOMING', 'COMPLETED', 'CANCELLED'] as const).map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setAppointmentStatusFilter(st)}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
+                      appointmentStatusFilter === st
+                        ? 'bg-teal-600 text-white'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {st === 'ALL' ? 'All' : st === 'UPCOMING' ? 'Upcoming' : st === 'COMPLETED' ? 'Completed' : 'Cancelled'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Bookings Feed Table / Cards */}
+            <div className="divide-y divide-slate-700">
+              {filteredAppointments.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs">
+                  No bookings found matching current filters.
+                </div>
+              ) : (
+                filteredAppointments.map((apt) => (
+                  <div key={apt.id} className="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xs flex-shrink-0">
+                        #{String(apt.patientNumber || apt.tokenNumber).padStart(2, '0')}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-xs text-white">{apt.doctorName}</h4>
+                          <span className="text-[10px] text-teal-400 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800">
+                            {apt.doctorSpecialty}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {apt.bookingId}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-1">
+                          Patient: <strong className="text-slate-200">{apt.patientName}</strong> • {apt.hospitalName} • {apt.date} at {apt.timeSlot}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 self-end sm:self-center">
+                      <div className="text-right">
+                        <span className="font-bold text-xs text-white">₹{apt.fee || 750}</span>
+                        <span className="block text-[10px] text-emerald-400 font-semibold">
+                          PAID (Razorpay)
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        {apt.bookingStatus === 'UPCOMING' && (
+                          <button
+                            onClick={() => {
+                              updateAppointmentStatus(apt.id, 'COMPLETED');
+                              showToast(`Consultation marked completed for ${apt.patientName}`, 'success');
+                            }}
+                            className="px-2.5 py-1 bg-emerald-600/80 hover:bg-emerald-600 text-white text-[11px] font-bold rounded-lg transition-colors"
+                          >
+                            Mark Done
+                          </button>
+                        )}
+                        {apt.bookingStatus !== 'CANCELLED' && (
+                          <button
+                            onClick={() => {
+                              updateAppointmentStatus(apt.id, 'CANCELLED');
+                              showToast(`Cancelled appointment ${apt.bookingId}`, 'warning');
+                            }}
+                            className="px-2.5 py-1 bg-rose-600/60 hover:bg-rose-600 text-white text-[11px] font-bold rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

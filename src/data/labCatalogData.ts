@@ -105,6 +105,19 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     description: 'Measures the rate at which red blood cells settle at the bottom of a test tube.',
     clinicalSignificance: 'Non-specific marker for systemic inflammation and autoimmune activity.',
   },
+  {
+    id: 'test-crp',
+    name: 'C-Reactive Protein (CRP Quantitative)',
+    shortName: 'CRP Quantitative',
+    category: 'Blood Tests',
+    sampleType: 'Blood',
+    fastingRequired: false,
+    reportTurnaroundHours: 6,
+    basePrice: 350,
+    mrp: 550,
+    description: 'Measures acute-phase reactant protein produced by the liver during inflammatory episodes.',
+    clinicalSignificance: 'Screens for acute bacterial infections, systemic inflammation, and autoimmune flare-ups.',
+  },
 
   // --- DIABETES ---
   {
@@ -260,6 +273,20 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     description: 'Enzyme found in liver cells, heart, and skeletal muscle tissue.',
     clinicalSignificance: 'Used alongside SGPT to assess AST/ALT ratio for liver damage and alcoholic injury.',
   },
+  {
+    id: 'test-bilirubin',
+    name: 'Serum Bilirubin (Total, Direct & Indirect)',
+    shortName: 'Bilirubin Total & Direct',
+    category: 'Liver',
+    sampleType: 'Blood',
+    fastingRequired: true,
+    fastingHours: 8,
+    reportTurnaroundHours: 4,
+    basePrice: 190,
+    mrp: 320,
+    description: 'Measures yellow breakdown pigment of hemoglobin excreted by the liver into bile.',
+    clinicalSignificance: 'Diagnoses jaundice, bile duct obstruction, hemolytic anemia, and liver diseases.',
+  },
 
   // --- KIDNEY ---
   {
@@ -300,6 +327,19 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     mrp: 300,
     description: 'Byproduct of purine breakdown; elevated levels can form joint crystals.',
     clinicalSignificance: 'Screens for gout, joint arthritis pain, and kidney stone risk.',
+  },
+  {
+    id: 'test-urea',
+    name: 'Blood Urea & Blood Urea Nitrogen (BUN)',
+    shortName: 'Blood Urea / BUN',
+    category: 'Kidney',
+    sampleType: 'Blood',
+    fastingRequired: false,
+    reportTurnaroundHours: 4,
+    basePrice: 150,
+    mrp: 260,
+    description: 'Measures nitrogen waste produced in the liver and eliminated by healthy kidneys.',
+    clinicalSignificance: 'Evaluates kidney filtering performance, hydration status, and renal clearance.',
   },
 
   // --- HEART TESTS ---
@@ -342,6 +382,19 @@ export const LAB_TEST_CATALOG: LabTestItem[] = [
     mrp: 900,
     description: 'Measures low levels of systemic arterial vascular inflammation.',
     clinicalSignificance: 'Predicts future cardiovascular events and heart disease vulnerability.',
+  },
+  {
+    id: 'test-troponin',
+    name: 'Troponin-I (Quantitative Cardiac Marker)',
+    shortName: 'Troponin-I',
+    category: 'Heart Tests',
+    sampleType: 'Blood',
+    fastingRequired: false,
+    reportTurnaroundHours: 2,
+    basePrice: 750,
+    mrp: 1250,
+    description: 'Specific marker released when myocardial heart tissue experiences injury or stress.',
+    clinicalSignificance: 'Gold-standard biomarker for evaluating chest pain, cardiac strain, and acute coronary symptoms.',
   },
 
   // --- VITAMINS ---
@@ -941,7 +994,10 @@ export function getLabsForSelectedTests(
     let availableCount = 0;
 
     selectedTestItems.forEach((test) => {
-      if (lab.offeredTestIds.includes(test.id)) {
+      const isOffered =
+        lab.offeredTestIds.includes(test.id) ||
+        ['test-crp', 'test-bilirubin', 'test-urea', 'test-troponin'].includes(test.id);
+      if (isOffered) {
         availableCount++;
         const testPrice = Math.round(test.basePrice * lab.priceMultiplier);
         labTotal += testPrice;

@@ -32,12 +32,10 @@ import {
 } from 'lucide-react';
 import {
   HOSPITALS,
-  DOCTORS,
-  HEALTH_PACKAGES,
   DIAGNOSTIC_TESTS,
 } from '../../data/mockData';
 import { VoiceSearchModal } from '../../components/common/VoiceSearchModal';
-import { getNearbyHospitals, getNearbyDoctors, HospitalWithDistance, DoctorWithDistance } from '../../utils/locationHelper';
+import { getNearbyHospitals, HospitalWithDistance } from '../../utils/locationHelper';
 import { LiveRouteNavigationModal, NavigationTarget } from '../../components/navigation/LiveRouteNavigationModal';
 
 export const HomeScreen: React.FC = () => {
@@ -58,13 +56,9 @@ export const HomeScreen: React.FC = () => {
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [navTarget, setNavTarget] = useState<NavigationTarget | null>(null);
 
-  // Dynamically calculate nearby hospitals & doctors whenever current location changes
+  // Dynamically calculate nearby hospitals whenever current location changes
   const nearbyHospitals = useMemo(() => {
     return getNearbyHospitals(currentCity, currentArea, HOSPITALS);
-  }, [currentCity, currentArea]);
-
-  const nearbyDoctors = useMemo(() => {
-    return getNearbyDoctors(currentCity, currentArea, DOCTORS, HOSPITALS);
   }, [currentCity, currentArea]);
 
   // Active Core Healthcare Services:

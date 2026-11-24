@@ -1,6 +1,6 @@
 // Doctor G - Core TypeScript Definitions
 
-export type AppRole = 'patient' | 'doctor' | 'hospital' | 'admin';
+export type AppRole = 'patient' | 'doctor' | 'hospital' | 'admin' | 'laboratory' | 'medical_shop';
 
 export type LanguageCode =
   | 'en'
@@ -167,6 +167,8 @@ export interface Appointment {
   queueStatus: QueueStatus;
   reason: string;
   symptoms?: string[];
+  notes?: string;
+  razorpayPaymentId?: string;
   createdAt: string;
   isDemo: boolean;
 }

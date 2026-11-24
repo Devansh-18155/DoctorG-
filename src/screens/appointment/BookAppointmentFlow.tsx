@@ -53,6 +53,7 @@ import {
 import { Hospital, Doctor, Department } from '../../types';
 import confetti from 'canvas-confetti';
 import { getNearbyHospitals, getNearbyDoctors, HospitalWithDistance, DoctorWithDistance, formatLocationName } from '../../utils/locationHelper';
+import { initiateRazorpayPayment } from '../../services/razorpayService';
 import { searchIndiaLocations, LocationSuggestion, INDIA_LOCATIONS_DATABASE } from '../../services/indiaLocationService';
 import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 import { TravelTimeCardSection } from '../../components/navigation/TravelTimeCardSection';
@@ -399,9 +400,10 @@ export const BookAppointmentFlow: React.FC = () => {
   const [confirmedBooking, setConfirmedBooking] = useState<any>(null);
 
   const handleExecutePayment = () => {
-    requireAuth(() => {
+    requireAuth(async () => {
       setIsProcessingPayment(true);
-      setTimeout(() => {
+
+      const completeBooking = (razorpayPaymentId?: string) => {
         setIsProcessingPayment(false);
 
         const newBooking = addAppointment({
@@ -434,6 +436,7 @@ export const BookAppointmentFlow: React.FC = () => {
           queueStatus: 'WAITING',
           reason: 'General Consultation',
           isDemo: true,
+          notes: razorpayPaymentId ? `Razorpay ID: ${razorpayPaymentId}` : undefined,
         });
 
         setConfirmedBooking(newBooking);
@@ -445,8 +448,40 @@ export const BookAppointmentFlow: React.FC = () => {
             spread: 70,
             origin: { y: 0.6 },
           });
-        } catch (e) {}
-      }, 1000);
+        } catch {
+          // ignore
+        }
+      };
+
+      if (paymentMethod === 'Hospital') {
+        completeBooking();
+      } else {
+        // Trigger Razorpay Checkout Modal
+        try {
+          const paymentResult = await initiateRazorpayPayment({
+            amount: selectedDoctor.consultationFee,
+            orderId: `ORD_${Date.now()}`,
+            name: 'Doctor G Healthcare',
+            description: `Consultation with ${selectedDoctor.name}`,
+            prefill: {
+              name: patientName || 'Patient',
+              email: 'patient@doctorg.in',
+              contact: patientPhone || '+919999999999',
+            },
+            theme: '#087E8B',
+          });
+
+          if (paymentResult.success) {
+            completeBooking(paymentResult.paymentId);
+          } else {
+            setIsProcessingPayment(false);
+            showToast(paymentResult.error || 'Payment cancelled', 'error');
+          }
+        } catch (err: any) {
+          setIsProcessingPayment(false);
+          showToast(err.message || 'Payment processing failed', 'error');
+        }
+      }
     }, 'Sign in to confirm your appointment reservation');
   };
 

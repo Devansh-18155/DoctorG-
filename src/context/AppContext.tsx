@@ -103,6 +103,7 @@ interface AppContextType {
   addAppointment: (apt: Omit<Appointment, 'id' | 'bookingId' | 'createdAt'>) => Appointment;
   cancelAppointment: (id: string, reason?: string) => void;
   rescheduleAppointment: (id: string, newDate: string, newSlot: string) => void;
+  updateAppointmentStatus: (id: string, status: 'UPCOMING' | 'COMPLETED' | 'CANCELLED') => void;
 
   // Cart & Pharmacy
   cart: CartItem[];
@@ -535,6 +536,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Appointment rescheduled successfully.', 'success');
   };
 
+  const updateAppointmentStatus = (id: string, status: 'UPCOMING' | 'COMPLETED' | 'CANCELLED') => {
+    setAppointments((prev) =>
+      prev.map((apt) =>
+        apt.id === id
+          ? {
+              ...apt,
+              bookingStatus: status,
+              queueStatus: status === 'COMPLETED' ? 'COMPLETED' : status === 'CANCELLED' ? 'CANCELLED' : apt.queueStatus,
+            }
+          : apt
+      )
+    );
+    showToast(`Appointment status updated to ${status}.`, 'success');
+  };
+
   // Cart & Orders
   const addToCart = (product: MedicineProduct, quantity = 1) => {
     setCart((prev) => {
@@ -819,6 +835,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addAppointment,
         cancelAppointment,
         rescheduleAppointment,
+        updateAppointmentStatus,
         cart,
         addToCart,
         updateCartQuantity,

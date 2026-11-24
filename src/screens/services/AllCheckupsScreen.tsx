@@ -54,6 +54,7 @@ import {
   NavigationTarget,
 } from '../../components/navigation/LiveRouteNavigationModal';
 import { DoctorMap, MapMarkerItem } from '../../components/doctor/DoctorMap';
+import { initiateRazorpayPayment } from '../../services/razorpayService';
 
 type StepType = 'all-checkups' | 'lab-results' | 'book-test' | 'confirmed';
 type MainTabType = 'tests' | 'packages';
@@ -88,6 +89,8 @@ export const AllCheckupsScreen: React.FC = () => {
 
   // Screen 1 Search & Category Filtering
   const [testSearchQuery, setTestSearchQuery] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [categorySearchQuery, setCategorySearchQuery] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [selectedTestIds, setSelectedTestIds] = useState<string[]>(['test-cbc']);
   const [expandedClinicalTestId, setExpandedClinicalTestId] = useState<string | null>(null);
@@ -149,7 +152,7 @@ export const AllCheckupsScreen: React.FC = () => {
     {
       id: 'Blood Tests',
       title: t('catBlood', 'Blood Tests'),
-      subtitle: t('catBloodSub', 'CBC, Hemoglobin, Blood Group'),
+      subtitle: t('catBloodSub', 'CBC, Hemoglobin, Blood Group, ESR, CRP'),
       icon: Droplets,
       color: 'text-rose-500',
       bgColor: 'bg-rose-50',
@@ -228,6 +231,52 @@ export const AllCheckupsScreen: React.FC = () => {
     return normTest.includes(normFilter) || normFilter.includes(normTest);
   };
 
+  // Current active category object
+  const currentCategoryObj = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    return INDIVIDUAL_CATEGORIES.find((cat) => cat.id === selectedCategoryId) || null;
+  }, [selectedCategoryId, INDIVIDUAL_CATEGORIES]);
+
+  // All tests belonging to the selected dedicated category
+  const categoryIndividualTests = useMemo(() => {
+    if (!selectedCategoryId) return [];
+    return LAB_TEST_CATALOG.filter((test) =>
+      matchesCategoryFilter(test.category, selectedCategoryId)
+    );
+  }, [selectedCategoryId]);
+
+  // Tests in dedicated category filtered by category voice/text search
+  const categoryFilteredIndividualTests = useMemo(() => {
+    const q = categorySearchQuery.toLowerCase().trim();
+    if (!q) return categoryIndividualTests;
+    return categoryIndividualTests.filter(
+      (test) =>
+        test.name.toLowerCase().includes(q) ||
+        test.shortName.toLowerCase().includes(q) ||
+        test.description.toLowerCase().includes(q) ||
+        test.clinicalSignificance.toLowerCase().includes(q)
+    );
+  }, [categoryIndividualTests, categorySearchQuery]);
+
+  // Fasting requirements flag for dedicated category
+  const categoryFastingRequired = useMemo(() => {
+    return categoryIndividualTests.some((t) => t.fastingRequired);
+  }, [categoryIndividualTests]);
+
+  // Global search matching tests for Screen 1
+  const globalSearchMatchingTests = useMemo(() => {
+    const q = testSearchQuery.toLowerCase().trim();
+    if (!q) return [];
+    return LAB_TEST_CATALOG.filter(
+      (test) =>
+        test.name.toLowerCase().includes(q) ||
+        test.shortName.toLowerCase().includes(q) ||
+        test.category.toLowerCase().includes(q) ||
+        test.description.toLowerCase().includes(q) ||
+        test.clinicalSignificance.toLowerCase().includes(q)
+    );
+  }, [testSearchQuery]);
+
   // Filtered Tests for Individual Tests Tab
   const filteredIndividualTests = useMemo(() => {
     return LAB_TEST_CATALOG.filter((test) => {
@@ -279,6 +328,125 @@ export const AllCheckupsScreen: React.FC = () => {
         return [...prev, testId];
       }
     });
+  };
+
+  // Render Test Card Helper (for dedicated category tests and search results)
+  const renderTestCard = (test: LabTestItem) => {
+    const isSelected = selectedTestIds.includes(test.id);
+    const isExpanded = expandedClinicalTestId === test.id;
+    const discount = Math.round(((test.mrp - test.basePrice) / test.mrp) * 100);
+
+    return (
+      <div
+        key={test.id}
+        className={`bg-white rounded-2xl border transition-all p-3.5 shadow-2xs hover:shadow-md ${
+          isSelected
+            ? 'border-[#087E8B] ring-2 ring-[#087E8B]/10 bg-teal-50/20'
+            : 'border-slate-200/90'
+        }`}
+      >
+        {/* Top test row: Title, Tags, Price & Add Button */}
+        <div className="flex items-start justify-between gap-3">
+          <div
+            className="flex-1 cursor-pointer"
+            onClick={() => toggleTestSelection(test.id)}
+          >
+            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">
+                {test.category}
+              </span>
+              <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
+                <Droplets className="w-3 h-3 text-red-500" /> {test.sampleType} {t('sampleType', 'Sample')}
+              </span>
+              {test.fastingRequired ? (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
+                  {t('fasting', 'Fasting')}: {test.fastingHours} hrs
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-50 text-emerald-700">
+                  {t('noFastingRequired', 'No fasting')}
+                </span>
+              )}
+              <span className="text-[10px] text-slate-400">
+                {t('reportInHours', 'Reports in')} {test.reportTurnaroundHours}h
+              </span>
+            </div>
+
+            <h3 className="font-extrabold text-sm text-[#172B4D] leading-snug">
+              {test.name}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {test.shortName} • {test.description}
+            </p>
+          </div>
+
+          {/* Price and Add/Remove button */}
+          <div className="flex flex-col items-end justify-between flex-shrink-0">
+            <div className="text-right">
+              <div className="flex items-baseline gap-1.5 justify-end">
+                <span className="font-extrabold text-base text-[#172B4D]">
+                  ₹{test.basePrice}
+                </span>
+                <span className="text-[11px] text-slate-400 line-through">
+                  ₹{test.mrp}
+                </span>
+              </div>
+              {discount > 0 && (
+                <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                  {discount}% OFF
+                </span>
+              )}
+            </div>
+
+            <button
+              onClick={() => toggleTestSelection(test.id)}
+              className={`mt-2 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 ${
+                isSelected
+                  ? 'bg-[#087E8B] hover:bg-[#076d78] text-white shadow-2xs ring-2 ring-[#087E8B]/20'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
+              title={isSelected ? t('remove', '- Remove') : t('add', '+ Add')}
+            >
+              {isSelected ? (
+                <>
+                  <Minus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>{t('remove', '- Remove')}</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>{t('add', '+ Add')}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Expandable "Why is this test done?" section */}
+        <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() =>
+              setExpandedClinicalTestId(isExpanded ? null : test.id)
+            }
+            className="text-[11px] font-semibold text-[#087E8B] hover:underline flex items-center gap-1"
+          >
+            <Info className="w-3 h-3" />
+            <span>
+              {isExpanded ? t('close', 'Close') : t('whyIsThisTestDone', 'Why is this test done?')}
+            </span>
+          </button>
+          <span className="text-[10px] text-slate-400 font-medium">NABL Quality Standard</span>
+        </div>
+
+        {isExpanded && (
+          <div className="mt-2 p-2.5 bg-slate-50 rounded-xl text-xs text-slate-600 border border-slate-200/60 animate-fadeIn">
+            <p className="font-bold text-slate-800 mb-0.5">Clinical Purpose:</p>
+            <p>{test.clinicalSignificance}</p>
+          </div>
+        )}
+      </div>
+    );
   };
 
   // Nearby Labs calculation (Screen 2)
@@ -411,7 +579,7 @@ export const AllCheckupsScreen: React.FC = () => {
   };
 
   // Confirm Final Booking (Screen 3 -> Screen 4)
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = async () => {
     if (!chosenLab) return;
     if (!patientName.trim()) {
       showToast('Please enter patient name', 'error');
@@ -430,38 +598,68 @@ export const AllCheckupsScreen: React.FC = () => {
     const finalAmount =
       (selectedPackage ? selectedPackage.price : chosenLab.totalSelectedPrice) + homeFee;
 
-    const newBooking = addTestBooking({
-      testOrPackageName: selectedPackage
-        ? selectedPackage.name
-        : selectedTestItems.length === 1
-        ? selectedTestItems[0].name
-        : `${selectedTestItems.length} Tests Panel (${selectedTestItems.map((t) => t.shortName).join(' + ')})`,
-      type: selectedPackage ? 'package' : selectedTestItems.length === 1 ? 'single-test' : 'package',
-      labName: chosenLab.name,
-      collectionMethod: collectionMethod,
-      collectionAddress: collectionMethod === 'HOME_COLLECTION' ? patientAddress : chosenLab.address,
-      date: selectedDate === 'Tomorrow' ? 'Tomorrow, 08:00 AM' : selectedDate,
-      timeSlot: selectedSlot,
-      patientName: patientName,
-      amount: finalAmount,
-      paymentStatus: paymentChoice === 'PAY_ONLINE' ? 'PAID' : 'PAY_AT_COLLECTION',
-      status: 'BOOKED',
-    });
+    const finalizeBooking = (razorpayPaymentId?: string) => {
+      const newBooking = addTestBooking({
+        testOrPackageName: selectedPackage
+          ? selectedPackage.name
+          : selectedTestItems.length === 1
+          ? selectedTestItems[0].name
+          : `${selectedTestItems.length} Tests Panel (${selectedTestItems.map((t) => t.shortName).join(' + ')})`,
+        type: selectedPackage ? 'package' : selectedTestItems.length === 1 ? 'single-test' : 'package',
+        labName: chosenLab.name,
+        collectionMethod: collectionMethod,
+        collectionAddress: collectionMethod === 'HOME_COLLECTION' ? patientAddress : chosenLab.address,
+        date: selectedDate === 'Tomorrow' ? 'Tomorrow, 08:00 AM' : selectedDate,
+        timeSlot: selectedSlot,
+        patientName: patientName,
+        amount: finalAmount,
+        paymentStatus: paymentChoice === 'PAY_ONLINE' ? 'PAID' : 'PAY_AT_COLLECTION',
+        status: 'BOOKED',
+      });
 
-    setConfirmedBookingResult({
-      ...newBooking,
-      lab: chosenLab,
-      selectedTests: selectedTestItems,
-      selectedPackage,
-      collectionMethod,
-      patientAddress,
-      homeFee,
-      finalAmount,
-    });
+      setConfirmedBookingResult({
+        ...newBooking,
+        lab: chosenLab,
+        selectedTests: selectedTestItems,
+        selectedPackage,
+        collectionMethod,
+        patientAddress,
+        homeFee,
+        finalAmount,
+        paymentId: razorpayPaymentId,
+      });
 
-    showToast('Diagnostic checkup booked successfully!', 'success');
-    setCurrentStep('confirmed');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Diagnostic checkup booked successfully!', 'success');
+      setCurrentStep('confirmed');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    if (paymentChoice === 'PAY_ONLINE') {
+      try {
+        const paymentResult = await initiateRazorpayPayment({
+          amount: finalAmount,
+          orderId: `LAB_${Date.now()}`,
+          name: chosenLab.name,
+          description: selectedPackage ? selectedPackage.name : `${selectedTestItems.length} Tests Panel`,
+          prefill: {
+            name: patientName,
+            email: 'patient@doctorg.in',
+            contact: patientPhone,
+          },
+          theme: '#087E8B',
+        });
+
+        if (paymentResult.success) {
+          finalizeBooking(paymentResult.paymentId);
+        } else {
+          showToast(paymentResult.error || 'Payment cancelled', 'error');
+        }
+      } catch (err: any) {
+        showToast(err.message || 'Payment initiation failed', 'error');
+      }
+    } else {
+      finalizeBooking();
+    }
   };
 
   // Handle Step Back
@@ -472,6 +670,9 @@ export const AllCheckupsScreen: React.FC = () => {
       setCurrentStep('lab-results');
     } else if (currentStep === 'lab-results') {
       setCurrentStep('all-checkups');
+    } else if (selectedCategoryId) {
+      setSelectedCategoryId(null);
+      setCategorySearchQuery('');
     } else {
       goBack();
     }
@@ -520,13 +721,19 @@ export const AllCheckupsScreen: React.FC = () => {
           </button>
           <div>
             <h1 className="text-base font-extrabold text-[#172B4D] leading-tight">
-              {currentStep === 'all-checkups' && t('allCheckupsTitle', 'All Checkups')}
+              {currentStep === 'all-checkups' &&
+                (selectedCategoryId
+                  ? (currentCategoryObj?.title || selectedCategoryId)
+                  : t('allCheckupsTitle', 'All Checkups'))}
               {currentStep === 'lab-results' && t('laboratoryResults', 'Laboratory Results')}
               {currentStep === 'book-test' && t('scheduleAndBook', 'Schedule & Book Appointment')}
               {currentStep === 'confirmed' && t('bookingConfirmed', 'Booking Confirmed')}
             </h1>
             <p className="text-[11px] text-slate-500 font-medium">
-              {currentStep === 'all-checkups' && t('heroSubtitle', 'Certified Pathology & Health Packages')}
+              {currentStep === 'all-checkups' &&
+                (selectedCategoryId
+                  ? `${categoryIndividualTests.length} ${t('testsAvailable', 'tests available')}`
+                  : t('heroSubtitle', 'Certified Pathology & Health Packages'))}
               {currentStep === 'lab-results' && `${nearbyLabs.length} ${t('laboratoriesAvailable', 'labs available near you')}`}
               {currentStep === 'book-test' && chosenLab?.name}
               {currentStep === 'confirmed' && t('barcodeTokenNotice', 'Digital token generated')}
@@ -669,225 +876,227 @@ export const AllCheckupsScreen: React.FC = () => {
           {/* ======================================================== */}
           {activeMainTab === 'tests' && (
             <div className="space-y-4">
-              {/* Category selector row header */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-extrabold text-xs text-[#172B4D] uppercase tracking-wider">
-                    Test Categories
-                  </h3>
-                  <p className="text-[11px] text-slate-400">
-                    Click a category to browse relevant diagnostics
-                  </p>
-                </div>
-                {activeCategory !== 'All' && (
-                  <button
-                    onClick={() => setActiveCategory('All')}
-                    className="text-xs font-bold text-[#087E8B] hover:underline flex items-center gap-1"
-                  >
-                    <span>View All ({LAB_TEST_CATALOG.length})</span>
-                  </button>
-                )}
-              </div>
+              {/* If user clicked any category card, open dedicated screen for that selected category */}
+              {selectedCategoryId ? (
+                <div className="space-y-4 animate-fadeIn">
+                  {/* Dedicated Category Header Navigation Card */}
+                  <div className="bg-white rounded-3xl border border-slate-200/90 p-4 shadow-2xs">
+                    <div className="flex items-center justify-between mb-3">
+                      <button
+                        onClick={() => {
+                          setSelectedCategoryId(null);
+                          setCategorySearchQuery('');
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-[#087E8B] hover:text-[#06626D] bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-xl transition-all active:scale-95"
+                      >
+                        <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
+                        <span>{t('backToCategories', 'Back to All Categories')}</span>
+                      </button>
 
-              {/* 8 Clickable Category Cards (Grid 2-column) */}
-              <div className="grid grid-cols-2 gap-2.5">
-                {INDIVIDUAL_CATEGORIES.map((cat) => {
-                  const Icon = cat.icon;
-                  const isCategoryActive = activeCategory === cat.id;
+                      <span className="text-[11px] font-extrabold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200/60">
+                        {categoryIndividualTests.length} {t('testsAvailable', 'Tests Available')}
+                      </span>
+                    </div>
 
-                  return (
-                    <div
-                      key={cat.id}
-                      onClick={() => {
-                        setActiveCategory(isCategoryActive ? 'All' : cat.id);
-                        setTestSearchQuery('');
-                      }}
-                      className={`p-3 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between min-h-[82px] shadow-2xs hover:shadow-md ${
-                        isCategoryActive
-                          ? 'border-[#087E8B] bg-teal-50/70 ring-2 ring-[#087E8B]/20'
-                          : `bg-white ${cat.borderColor}`
-                      }`}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div
-                          className={`w-8 h-8 rounded-xl ${cat.bgColor} flex items-center justify-center flex-shrink-0`}
-                        >
-                          <Icon className={`w-4 h-4 ${cat.color}`} />
-                        </div>
-                        {isCategoryActive && (
-                          <span className="w-2 h-2 rounded-full bg-[#087E8B]" />
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-12 h-12 rounded-2xl ${
+                          currentCategoryObj?.bgColor || 'bg-teal-50'
+                        } flex items-center justify-center flex-shrink-0 shadow-2xs`}
+                      >
+                        {currentCategoryObj && (
+                          <currentCategoryObj.icon
+                            className={`w-6 h-6 ${currentCategoryObj.color}`}
+                          />
                         )}
                       </div>
-
-                      <div className="mt-2">
-                        <h4 className="font-extrabold text-xs text-[#172B4D] leading-tight">
-                          {cat.title}
-                        </h4>
-                        <p className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5 line-clamp-1">
-                          {cat.subtitle}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-base sm:text-lg font-black text-[#172B4D] leading-tight">
+                            {currentCategoryObj?.title || selectedCategoryId}
+                          </h2>
+                          <span className="text-[10px] font-bold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200/60">
+                            Verified Tests
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 font-medium mt-1">
+                          {currentCategoryObj?.subtitle}
                         </p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              {/* Fasting Requirement Notification if any selected test requires fasting */}
-              {anyFastingRequired && (
-                <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5">
-                  <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-950 leading-snug">
-                    <span className="font-bold">Fasting Notice:</span> One or more of your selected tests requires {maxFastingHours > 0 ? `${maxFastingHours} hours` : 'overnight'} fasting.
                   </div>
-                </div>
-              )}
 
-              {/* Test Cards List */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pt-1">
-                  <h4 className="font-bold text-xs text-slate-600 uppercase tracking-wider">
-                    {activeCategory === 'All' ? 'All Individual Tests' : activeCategory}
-                  </h4>
-                  <span className="text-[11px] text-slate-400">
-                    {filteredIndividualTests.length} tests available
-                  </span>
-                </div>
+                  {/* Dedicated Search Bar with Voice / Microphone Search */}
+                  <div className="bg-white rounded-2xl p-2 border border-slate-200/90 shadow-2xs">
+                    <VoiceSearchInput
+                      value={categorySearchQuery}
+                      onChange={(e) => setCategorySearchQuery(e.target.value)}
+                      onChangeValue={(val) => setCategorySearchQuery(val)}
+                      placeholder={`Search in ${currentCategoryObj?.title || 'this category'} (e.g. CBC, Hb, etc.)...`}
+                      searchCategory="test"
+                      language="auto"
+                      onClear={() => setCategorySearchQuery('')}
+                    />
+                  </div>
 
-                {filteredIndividualTests.map((test) => {
-                  const isSelected = selectedTestIds.includes(test.id);
-                  const isExpanded = expandedClinicalTestId === test.id;
-                  const discount = Math.round(((test.mrp - test.basePrice) / test.mrp) * 100);
-
-                  return (
-                    <div
-                      key={test.id}
-                      className={`bg-white rounded-2xl border transition-all p-3.5 shadow-2xs hover:shadow-md ${
-                        isSelected
-                          ? 'border-[#087E8B] ring-2 ring-[#087E8B]/10 bg-teal-50/20'
-                          : 'border-slate-200/90'
-                      }`}
-                    >
-                      {/* Top test row: Title, Tags, Price & Add Button */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div
-                          className="flex-1 cursor-pointer"
-                          onClick={() => toggleTestSelection(test.id)}
-                        >
-                          <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700">
-                              {test.category}
-                            </span>
-                            <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
-                              <Droplets className="w-3 h-3 text-red-500" /> {test.sampleType} {t('sampleType', 'Sample')}
-                            </span>
-                            {test.fastingRequired ? (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
-                                {t('fasting', 'Fasting')}: {test.fastingHours} hrs
-                              </span>
-                            ) : (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-50 text-emerald-700">
-                                {t('noFastingRequired', 'No fasting')}
-                              </span>
-                            )}
-                            <span className="text-[10px] text-slate-400">
-                              {t('reportInHours', 'Reports in')} {test.reportTurnaroundHours}h
-                            </span>
-                          </div>
-
-                          <h3 className="font-extrabold text-sm text-[#172B4D] leading-snug">
-                            {test.name}
-                          </h3>
-                          <p className="text-xs text-slate-500 font-medium mt-0.5">
-                            {test.shortName} • {test.description}
-                          </p>
-                        </div>
-
-                        {/* Price and Add/Remove button */}
-                        <div className="flex flex-col items-end justify-between flex-shrink-0">
-                          <div className="text-right">
-                            <div className="flex items-baseline gap-1.5 justify-end">
-                              <span className="font-extrabold text-base text-[#172B4D]">
-                                ₹{test.basePrice}
-                              </span>
-                              <span className="text-[11px] text-slate-400 line-through">
-                                ₹{test.mrp}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                              {discount}% OFF
-                            </span>
-                          </div>
-
-                          <button
-                            onClick={() => toggleTestSelection(test.id)}
-                            className={`mt-2 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
-                              isSelected
-                                ? 'bg-[#087E8B] hover:bg-[#076d78] text-white shadow-2xs'
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                            }`}
-                            title={isSelected ? t('remove', '- Remove') : t('add', '+ Add')}
-                          >
-                            {isSelected ? (
-                              <>
-                                <Minus className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>{t('remove', '- Remove')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>{t('add', '+ Add')}</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
+                  {/* Fasting Notice for this Category if applicable */}
+                  {categoryFastingRequired && (
+                    <div className="bg-amber-50/90 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5">
+                      <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-amber-950 leading-snug">
+                        <span className="font-bold">Fasting Notice:</span> Some tests in this category require 8-12 hours of overnight fasting before sample collection for accurate results.
                       </div>
+                    </div>
+                  )}
 
-                      {/* Expandable "Why is this test done?" section */}
-                      <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExpandedClinicalTestId(isExpanded ? null : test.id)
-                          }
-                          className="text-[11px] font-semibold text-[#087E8B] hover:underline flex items-center gap-1"
-                        >
-                          <Info className="w-3 h-3" />
-                          <span>
-                            {isExpanded ? t('close', 'Close') : t('whyIsThisTestDone', 'Why is this test done?')}
-                          </span>
-                        </button>
-                        <span className="text-[10px] text-slate-400">NABL Quality Standard</span>
-                      </div>
-
-                      {isExpanded && (
-                        <div className="mt-2 p-2.5 bg-slate-50 rounded-xl text-xs text-slate-600 border border-slate-200/60 animate-fadeIn">
-                          <p className="font-bold text-slate-800 mb-0.5">Clinical Purpose:</p>
-                          <p>{test.clinicalSignificance}</p>
-                        </div>
+                  {/* Individual Test Cards List */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pt-1">
+                      <h4 className="font-bold text-xs text-slate-600 uppercase tracking-wider">
+                        {currentCategoryObj?.title} Tests ({categoryFilteredIndividualTests.length})
+                      </h4>
+                      {selectedTestIds.length > 0 && (
+                        <span className="text-[11px] font-bold text-[#087E8B]">
+                          {selectedTestIds.length} Total Selected
+                        </span>
                       )}
                     </div>
-                  );
-                })}
 
-                {filteredIndividualTests.length === 0 && (
-                  <div className="bg-white rounded-2xl p-8 text-center border border-slate-200">
-                    <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                    <h4 className="font-bold text-sm text-slate-700">No tests matched your search</h4>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Try searching for keywords like "CBC", "Sugar", "Thyroid", "Lipid", or clear filters.
-                    </p>
+                    {categoryFilteredIndividualTests.length === 0 ? (
+                      <div className="bg-white rounded-2xl p-8 text-center border border-slate-200/90 shadow-2xs">
+                        <FlaskConical className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                        <h4 className="font-bold text-sm text-[#172B4D]">No tests match your search</h4>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Try another search term or clear the filter.
+                        </p>
+                        <button
+                          onClick={() => setCategorySearchQuery('')}
+                          className="mt-3 px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl"
+                        >
+                          Clear Search
+                        </button>
+                      </div>
+                    ) : (
+                      categoryFilteredIndividualTests.map((test) => renderTestCard(test))
+                    )}
+                  </div>
+                </div>
+              ) : testSearchQuery.trim().length > 0 ? (
+                /* Global Search Results across all categories */
+                <div className="space-y-3 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-xs text-slate-600 uppercase tracking-wider">
+                      Search Results ({globalSearchMatchingTests.length})
+                    </h4>
                     <button
-                      onClick={() => {
-                        setTestSearchQuery('');
-                        setActiveCategory('All');
-                      }}
-                      className="mt-3 px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700"
+                      onClick={() => setTestSearchQuery('')}
+                      className="text-xs font-bold text-[#087E8B] hover:underline"
                     >
-                      Reset Filters
+                      Clear Search
                     </button>
                   </div>
-                )}
-              </div>
+
+                  {globalSearchMatchingTests.length === 0 ? (
+                    <div className="bg-white rounded-2xl p-8 text-center border border-slate-200/90">
+                      <Search className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+                      <h4 className="font-bold text-sm text-slate-700">No tests matched your search</h4>
+                      <p className="text-xs text-slate-500 mt-1">
+                        Try searching for keywords like "CBC", "Sugar", "Thyroid", "Lipid", or pick a category below.
+                      </p>
+                      <button
+                        onClick={() => setTestSearchQuery('')}
+                        className="mt-3 px-4 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-700"
+                      >
+                        Show All Categories
+                      </button>
+                    </div>
+                  ) : (
+                    globalSearchMatchingTests.map((test) => renderTestCard(test))
+                  )}
+                </div>
+              ) : (
+                /* 8 Category Cards (2-column layout) */
+                <div className="space-y-4 animate-fadeIn">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-extrabold text-xs text-[#172B4D] uppercase tracking-wider">
+                        Test Categories
+                      </h3>
+                      <p className="text-[11px] text-slate-400">
+                        Click any category to open all available tests
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {INDIVIDUAL_CATEGORIES.map((cat) => {
+                      const Icon = cat.icon;
+                      const countInCat = LAB_TEST_CATALOG.filter((t) =>
+                        matchesCategoryFilter(t.category, cat.id)
+                      ).length;
+                      const selectedCountInCat = LAB_TEST_CATALOG.filter(
+                        (t) =>
+                          matchesCategoryFilter(t.category, cat.id) &&
+                          selectedTestIds.includes(t.id)
+                      ).length;
+
+                      return (
+                        <div
+                          key={cat.id}
+                          onClick={() => {
+                            setSelectedCategoryId(cat.id);
+                            setCategorySearchQuery('');
+                          }}
+                          className={`p-3.5 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] flex flex-col justify-between min-h-[96px] shadow-2xs hover:shadow-md hover:border-[#087E8B]/60 select-none ${
+                            selectedCountInCat > 0
+                              ? 'border-[#087E8B] bg-teal-50/50 ring-1 ring-[#087E8B]/30'
+                              : `bg-white ${cat.borderColor}`
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div
+                              className={`w-9 h-9 rounded-xl ${cat.bgColor} flex items-center justify-center flex-shrink-0 shadow-2xs`}
+                            >
+                              <Icon className={`w-4 h-4 ${cat.color}`} />
+                            </div>
+
+                            {selectedCountInCat > 0 ? (
+                              <span className="text-[10px] font-extrabold text-[#087E8B] bg-teal-100/90 px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-2xs">
+                                <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                <span>{selectedCountInCat} Added</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
+                                <span>{countInCat} Tests</span>
+                                <ChevronRight className="w-3 h-3 text-slate-400" />
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="mt-2.5">
+                            <h4 className="font-extrabold text-xs text-[#172B4D] leading-tight flex items-center justify-between">
+                              <span>{cat.title}</span>
+                            </h4>
+                            <p className="text-[10px] text-slate-500 font-medium leading-tight mt-1 line-clamp-1">
+                              {cat.subtitle}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Fasting Notice if any selected test requires fasting */}
+                  {anyFastingRequired && (
+                    <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-3 flex items-start gap-2.5">
+                      <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs text-amber-950 leading-snug">
+                        <span className="font-bold">Fasting Notice:</span> One or more of your selected tests requires {maxFastingHours > 0 ? `${maxFastingHours} hours` : 'overnight'} fasting before sample collection.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
