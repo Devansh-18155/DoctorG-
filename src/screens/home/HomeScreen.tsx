@@ -37,7 +37,6 @@ import {
   DIAGNOSTIC_TESTS,
 } from '../../data/mockData';
 import { VoiceSearchModal } from '../../components/common/VoiceSearchModal';
-import { NearbyCareExplorer } from '../../components/common/NearbyCareExplorer';
 import { getNearbyHospitals, getNearbyDoctors, HospitalWithDistance, DoctorWithDistance } from '../../utils/locationHelper';
 import { LiveRouteNavigationModal, NavigationTarget } from '../../components/navigation/LiveRouteNavigationModal';
 
@@ -227,9 +226,6 @@ export const HomeScreen: React.FC = () => {
             })}
           </div>
         </div>
-
-        {/* DYNAMIC NEARBY CARE RADAR & LOCATION EXPLORER */}
-        <NearbyCareExplorer onOpenLocationModal={() => setIsLocationOpen(true)} />
 
         {/* FEATURED DOCTORS */}
         <div>
