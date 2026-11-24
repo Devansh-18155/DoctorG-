@@ -68,14 +68,11 @@ export const HomeScreen: React.FC = () => {
     return getNearbyDoctors(currentCity, currentArea, DOCTORS, HOSPITALS);
   }, [currentCity, currentArea]);
 
-  // Active Service Cards:
+  // Active Core Healthcare Services:
   // 1. Book Appointment
   // 2. Find Ambulance
-  // 3. Medical Store
-  // 4. Medical Checkup
-  // 5. All Checkups
-  // 6. Blood Bank
-  // 7. Traditional Healing
+  // 3. All Checkups
+  // 4. Traditional Healing
   const SERVICES = [
     {
       id: 'book-appointment',
@@ -98,26 +95,6 @@ export const HomeScreen: React.FC = () => {
       screen: 'find-ambulance',
     },
     {
-      id: 'medical-store',
-      title: t('medicalStore') || 'Medical Store',
-      subtitle: 'Doorstep Delivery',
-      icon: Store,
-      bgGradient: 'from-amber-50 to-orange-50',
-      iconColor: 'text-amber-700',
-      badge: 'Flat 15% OFF',
-      screen: 'medical-store',
-    },
-    {
-      id: 'medical-checkup',
-      title: t('medicalCheckup') || 'Medical Checkup',
-      subtitle: 'Individual Lab Tests',
-      icon: FlaskConical,
-      bgGradient: 'from-sky-50 to-cyan-50',
-      iconColor: 'text-sky-700',
-      badge: 'Home Sample',
-      screen: 'medical-checkup',
-    },
-    {
       id: 'all-checkups',
       title: t('allCheckups') || 'All Checkups',
       subtitle: 'Complete Packages',
@@ -126,16 +103,6 @@ export const HomeScreen: React.FC = () => {
       iconColor: 'text-indigo-700',
       badge: 'Up to 60% OFF',
       screen: 'all-checkups',
-    },
-    {
-      id: 'blood-bank',
-      title: t('bloodBank') || 'Blood Bank',
-      subtitle: 'Stock & Donors',
-      icon: Droplet,
-      bgGradient: 'from-rose-50 to-pink-50',
-      iconColor: 'text-rose-700',
-      badge: 'Verified Units',
-      screen: 'blood-bank',
     },
     {
       id: 'traditional-healing',
