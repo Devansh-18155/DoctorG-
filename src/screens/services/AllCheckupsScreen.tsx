@@ -17,6 +17,7 @@ import {
   Home,
   Building2,
   Plus,
+  Minus,
   Trash2,
   Check,
   ExternalLink,
@@ -671,18 +672,19 @@ export const AllCheckupsScreen: React.FC = () => {
                         onClick={() => toggleTestSelection(test.id)}
                         className={`mt-2 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
                           isSelected
-                            ? 'bg-[#087E8B] text-white shadow-2xs hover:bg-[#076d78]'
+                            ? 'bg-[#087E8B] hover:bg-[#076d78] text-white shadow-2xs'
                             : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                         }`}
+                        title={isSelected ? 'Remove this test' : 'Add this test'}
                       >
                         {isSelected ? (
                           <>
-                            <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                            <span>Added</span>
+                            <Minus className="w-3.5 h-3.5 stroke-[3]" />
+                            <span>Remove</span>
                           </>
                         ) : (
                           <>
-                            <Plus className="w-3.5 h-3.5" />
+                            <Plus className="w-3.5 h-3.5 stroke-[3]" />
                             <span>Add</span>
                           </>
                         )}
