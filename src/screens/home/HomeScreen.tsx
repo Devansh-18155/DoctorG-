@@ -157,35 +157,7 @@ export const HomeScreen: React.FC = () => {
       />
 
       <div className="px-4 py-3 space-y-4">
-        {/* Prominent Search Bar with Mic button */}
-        <div
-          onClick={() => navigateTo('search')}
-          className="flex items-center gap-2.5 bg-white border border-slate-200/90 rounded-2xl px-3.5 py-2.5 shadow-xs hover:border-teal-500 hover:shadow-sm cursor-pointer transition-all group"
-        >
-          <Search className="w-4 h-4 text-slate-400 group-hover:text-[#087E8B] transition-colors" />
-          <span className="text-xs text-slate-400 group-hover:text-slate-600 flex-1 truncate">
-            {t('searchPlaceholder') || 'Search hospitals, medicines, tests...'}
-          </span>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsVoiceModalOpen(true);
-              }}
-              className="p-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-[#087E8B] hover:scale-105 active:scale-95 transition-all shadow-2xs flex items-center gap-1 border border-teal-200/50"
-              title="Voice Search Everything"
-            >
-              <Mic className="w-3.5 h-3.5 text-[#087E8B]" />
-              <span className="text-[10px] font-bold">Voice</span>
-            </button>
-            <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded-xl border border-slate-200">
-              Search
-            </span>
-          </div>
-        </div>
-
-        {/* EXACTLY 8 HEALTHCARE SERVICES GRID */}
+        {/* Healthcare Services Grid */}
         <div>
           <div className="flex items-center justify-between mb-2.5">
             <div>

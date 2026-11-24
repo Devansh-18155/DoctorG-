@@ -5,7 +5,6 @@ import {
   Bell,
   Globe,
   ChevronDown,
-  ShieldAlert,
   User,
   HeartHandshake,
 } from 'lucide-react';
@@ -61,16 +60,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
 
         {/* Action icons */}
         <div className="flex items-center gap-1.5">
-          {/* Quick Emergency Button */}
-          <button
-            onClick={() => navigateTo('emergency')}
-            className="flex items-center gap-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-full text-xs font-bold transition-colors animate-pulse"
-            title="Emergency SOS / Ambulance / Nearest Hospital"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
-            <span className="text-[11px]">SOS 108</span>
-          </button>
-
           {/* Language selector button */}
           <button
             onClick={onOpenLanguage}
