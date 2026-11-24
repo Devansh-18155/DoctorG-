@@ -524,26 +524,6 @@ export const AllCheckupsScreen: React.FC = () => {
       {/* ========================================================================= */}
       {currentStep === 'select-tests' && (
         <div className="p-4 space-y-4 max-w-3xl mx-auto">
-          {/* Hero Banner */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#087E8B] to-[#172B4D] p-4 text-white shadow-md">
-            <div className="relative z-10 space-y-1">
-              <div className="flex items-center gap-1.5">
-                <span className="bg-white/20 backdrop-blur-xs text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                  Verified Lab Network
-                </span>
-                <span className="bg-amber-400 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" /> 100% NABL Quality
-                </span>
-              </div>
-              <h2 className="text-base font-extrabold text-white leading-tight">
-                Accurate Blood, Urine & Health Screening Tests
-              </h2>
-              <p className="text-xs text-teal-100 leading-relaxed">
-                Choose individual tests or comprehensive profiles. Compare real laboratory prices and get free doorstep sample collection.
-              </p>
-            </div>
-          </div>
-
           {/* Voice & Text Search Bar */}
           <div className="bg-white rounded-2xl p-2 border border-slate-200 shadow-2xs">
             <VoiceSearchInput
