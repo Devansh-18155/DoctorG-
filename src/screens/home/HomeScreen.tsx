@@ -68,11 +68,6 @@ export const HomeScreen: React.FC = () => {
     return getNearbyDoctors(currentCity, currentArea, DOCTORS, HOSPITALS);
   }, [currentCity, currentArea]);
 
-  // Find next upcoming appointment
-  const upcomingAppointment = appointments.find(
-    (apt) => apt.bookingStatus === 'UPCOMING'
-  );
-
   // Active Service Cards:
   // 1. Book Appointment
   // 2. Find Ambulance
@@ -222,59 +217,6 @@ export const HomeScreen: React.FC = () => {
             </span>
           </div>
         </div>
-
-        {/* Upcoming Appointment Card (if available) */}
-        {upcomingAppointment && (
-          <div className="bg-white rounded-2xl p-3.5 border border-teal-200/80 shadow-xs relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#087E8B] text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded-bl-lg uppercase tracking-wide">
-              Patient Number: #{String(upcomingAppointment.patientNumber || upcomingAppointment.tokenNumber).padStart(3, '0')}
-            </div>
-
-            <div className="flex items-start gap-3">
-              <img
-                src={upcomingAppointment.doctorImage}
-                alt={upcomingAppointment.doctorName}
-                className="w-12 h-12 rounded-xl object-cover border border-slate-200 flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
-                    Upcoming Appointment
-                  </span>
-                </div>
-                <h4 className="font-bold text-xs text-[#172B4D] truncate mt-1">
-                  {upcomingAppointment.doctorName}
-                </h4>
-                <p className="text-[11px] text-slate-500 truncate">
-                  {upcomingAppointment.department} • {upcomingAppointment.hospitalName}
-                </p>
-                <p className="text-[11px] font-semibold text-slate-700 mt-1">
-                  📅 {upcomingAppointment.date} at {upcomingAppointment.timeSlot}
-                </p>
-              </div>
-            </div>
-
-            {/* Quick Live Queue Tracker Bar */}
-            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[11px] text-slate-500">Queue Status: </span>
-                <span className="font-bold text-emerald-700">
-                  Current Patient: #{String(upcomingAppointment.currentToken).padStart(3, '0')}
-                </span>
-                <span className="text-[10px] text-slate-400 ml-1">
-                  (OPD: {upcomingAppointment.opdRoom || 'OPD 03'} • ~{upcomingAppointment.estimatedWaitMinutes}m wait)
-                </span>
-              </div>
-              <button
-                onClick={() => navigateTo('live-queue', { appointment: upcomingAppointment })}
-                className="flex items-center gap-1 text-[11px] font-bold text-[#087E8B] hover:text-[#06626D]"
-              >
-                <span>Track Queue</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* EXACTLY 8 HEALTHCARE SERVICES GRID */}
         <div>
