@@ -72,6 +72,8 @@ export const AllCheckupsScreen: React.FC = () => {
     user,
     addTestBooking,
     showToast,
+    t,
+    currentLanguage,
   } = useApp();
 
   // Navigation Steps:
@@ -142,12 +144,12 @@ export const AllCheckupsScreen: React.FC = () => {
     'Bengaluru',
   ];
 
-  // 8 Individual Test Categories (Matching reference design)
+  // 8 Individual Test Categories (Matching reference design & translated)
   const INDIVIDUAL_CATEGORIES = [
     {
       id: 'Blood Tests',
-      title: 'Blood Tests',
-      subtitle: 'CBC, Hemoglobin, Blood Group, etc.',
+      title: t('catBlood', 'Blood Tests'),
+      subtitle: t('catBloodSub', 'CBC, Hemoglobin, Blood Group'),
       icon: Droplets,
       color: 'text-rose-500',
       bgColor: 'bg-rose-50',
@@ -155,8 +157,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Diabetes Tests',
-      title: 'Diabetes Tests',
-      subtitle: 'Fasting Sugar, PP Sugar, HbA1c',
+      title: t('catDiabetes', 'Diabetes Tests'),
+      subtitle: t('catDiabetesSub', 'Fasting Sugar, PP Sugar, HbA1c'),
       icon: Activity,
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
@@ -164,8 +166,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Thyroid Tests',
-      title: 'Thyroid Tests',
-      subtitle: 'TSH, T3, T4',
+      title: t('catThyroid', 'Thyroid Tests'),
+      subtitle: t('catThyroidSub', 'TSH, T3, T4'),
       icon: ShieldCheck,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
@@ -173,8 +175,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Liver Tests',
-      title: 'Liver Tests',
-      subtitle: 'LFT, SGPT, SGOT, Bilirubin',
+      title: t('catLiver', 'Liver Tests'),
+      subtitle: t('catLiverSub', 'LFT, SGPT, SGOT, Bilirubin'),
       icon: FlaskConical,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
@@ -182,8 +184,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Kidney Tests',
-      title: 'Kidney Tests',
-      subtitle: 'KFT, Creatinine, Urea',
+      title: t('catKidney', 'Kidney Tests'),
+      subtitle: t('catKidneySub', 'KFT, Creatinine, Urea'),
       icon: Layers,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
@@ -191,8 +193,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Heart Tests',
-      title: 'Heart Tests',
-      subtitle: 'Lipid Profile, ECG, Troponin',
+      title: t('catHeart', 'Heart Tests'),
+      subtitle: t('catHeartSub', 'Lipid Profile, ECG, Troponin'),
       icon: Heart,
       color: 'text-red-500',
       bgColor: 'bg-red-50',
@@ -200,8 +202,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Vitamin Tests',
-      title: 'Vitamin Tests',
-      subtitle: 'Vitamin B12, Vitamin D, etc.',
+      title: t('catVitamins', 'Vitamin Tests'),
+      subtitle: t('catVitaminsSub', 'Vitamin B12, Vitamin D'),
       icon: Sparkles,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-50',
@@ -209,8 +211,8 @@ export const AllCheckupsScreen: React.FC = () => {
     },
     {
       id: 'Urine Tests',
-      title: 'Urine Tests',
-      subtitle: 'Urine Routine, Urine Culture',
+      title: t('catUrine', 'Urine Tests'),
+      subtitle: t('catUrineSub', 'Urine Routine, Urine Culture'),
       icon: Droplet,
       color: 'text-cyan-600',
       bgColor: 'bg-cyan-50',
@@ -518,16 +520,16 @@ export const AllCheckupsScreen: React.FC = () => {
           </button>
           <div>
             <h1 className="text-base font-extrabold text-[#172B4D] leading-tight">
-              {currentStep === 'all-checkups' && 'All Checkups'}
-              {currentStep === 'lab-results' && 'Laboratory Results'}
-              {currentStep === 'book-test' && 'Book Lab Appointment'}
-              {currentStep === 'confirmed' && 'Booking Confirmed'}
+              {currentStep === 'all-checkups' && t('allCheckupsTitle', 'All Checkups')}
+              {currentStep === 'lab-results' && t('laboratoryResults', 'Laboratory Results')}
+              {currentStep === 'book-test' && t('scheduleAndBook', 'Schedule & Book Appointment')}
+              {currentStep === 'confirmed' && t('bookingConfirmed', 'Booking Confirmed')}
             </h1>
             <p className="text-[11px] text-slate-500 font-medium">
-              {currentStep === 'all-checkups' && 'Certified Pathology & Health Packages'}
-              {currentStep === 'lab-results' && `${nearbyLabs.length} labs near ${currentArea}, ${currentCity}`}
+              {currentStep === 'all-checkups' && t('heroSubtitle', 'Certified Pathology & Health Packages')}
+              {currentStep === 'lab-results' && `${nearbyLabs.length} ${t('laboratoriesAvailable', 'labs available near you')}`}
               {currentStep === 'book-test' && chosenLab?.name}
-              {currentStep === 'confirmed' && 'Digital token generated'}
+              {currentStep === 'confirmed' && t('barcodeTokenNotice', 'Digital token generated')}
             </p>
           </div>
         </div>
@@ -567,10 +569,10 @@ export const AllCheckupsScreen: React.FC = () => {
                 Doctor G Diagnostics
               </span>
               <h2 className="text-base sm:text-lg font-black text-[#172B4D] leading-snug">
-                Select Your Checkup or Test
+                {t('heroHeading', 'Select Your Checkup or Test')}
               </h2>
               <p className="text-xs text-slate-600 leading-relaxed max-w-sm">
-                Choose from a wide range of laboratory tests and health packages
+                {t('heroSubtitle', 'Choose from a wide range of laboratory tests and health packages')}
               </p>
             </div>
 
@@ -628,7 +630,7 @@ export const AllCheckupsScreen: React.FC = () => {
               value={testSearchQuery}
               onChange={(e) => setTestSearchQuery(e.target.value)}
               onChangeValue={(val) => setTestSearchQuery(val)}
-              placeholder="Search tests (e.g., Vitamin B12, CBC)"
+              placeholder={t('searchTestsPlaceholder', 'Search tests (e.g., Vitamin B12, CBC)...')}
               searchCategory="test"
               language="auto"
               onClear={() => setTestSearchQuery('')}
@@ -646,7 +648,7 @@ export const AllCheckupsScreen: React.FC = () => {
               }`}
             >
               <FlaskConical className="w-4 h-4 text-[#087E8B]" />
-              <span>Individual Tests</span>
+              <span>{t('individualTests', 'Individual Tests')}</span>
             </button>
 
             <button
@@ -658,7 +660,7 @@ export const AllCheckupsScreen: React.FC = () => {
               }`}
             >
               <Package className="w-4 h-4 text-purple-600" />
-              <span>Health Packages</span>
+              <span>{t('healthPackages', 'Health Packages')}</span>
             </button>
           </div>
 
@@ -776,19 +778,19 @@ export const AllCheckupsScreen: React.FC = () => {
                               {test.category}
                             </span>
                             <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
-                              <Droplets className="w-3 h-3 text-red-500" /> {test.sampleType} Sample
+                              <Droplets className="w-3 h-3 text-red-500" /> {test.sampleType} {t('sampleType', 'Sample')}
                             </span>
                             {test.fastingRequired ? (
                               <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800">
-                                Fasting: {test.fastingHours} hrs
+                                {t('fasting', 'Fasting')}: {test.fastingHours} hrs
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-50 text-emerald-700">
-                                No fasting
+                                {t('noFastingRequired', 'No fasting')}
                               </span>
                             )}
                             <span className="text-[10px] text-slate-400">
-                              Reports in {test.reportTurnaroundHours}h
+                              {t('reportInHours', 'Reports in')} {test.reportTurnaroundHours}h
                             </span>
                           </div>
 
@@ -823,17 +825,17 @@ export const AllCheckupsScreen: React.FC = () => {
                                 ? 'bg-[#087E8B] hover:bg-[#076d78] text-white shadow-2xs'
                                 : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                             }`}
-                            title={isSelected ? 'Remove test' : 'Add test'}
+                            title={isSelected ? t('remove', '- Remove') : t('add', '+ Add')}
                           >
                             {isSelected ? (
                               <>
                                 <Minus className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>Remove</span>
+                                <span>{t('remove', '- Remove')}</span>
                               </>
                             ) : (
                               <>
                                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                                <span>Add</span>
+                                <span>{t('add', '+ Add')}</span>
                               </>
                             )}
                           </button>
@@ -851,7 +853,7 @@ export const AllCheckupsScreen: React.FC = () => {
                         >
                           <Info className="w-3 h-3" />
                           <span>
-                            {isExpanded ? 'Hide clinical significance' : 'Why is this test done?'}
+                            {isExpanded ? t('close', 'Close') : t('whyIsThisTestDone', 'Why is this test done?')}
                           </span>
                         </button>
                         <span className="text-[10px] text-slate-400">NABL Quality Standard</span>
@@ -1119,7 +1121,7 @@ export const AllCheckupsScreen: React.FC = () => {
             <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
-                  <SlidersHorizontal className="w-3.5 h-3.5" /> Sort:
+                  <SlidersHorizontal className="w-3.5 h-3.5" /> {t('sortBy', 'Sort')}:
                 </span>
                 {(['distance', 'price', 'rating'] as const).map((mode) => (
                   <button
@@ -1131,9 +1133,9 @@ export const AllCheckupsScreen: React.FC = () => {
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    {mode === 'distance' && '📍 Distance'}
-                    {mode === 'price' && '💰 Price'}
-                    {mode === 'rating' && '⭐ Rating'}
+                    {mode === 'distance' && `📍 ${t('sortByDistance', 'Distance')}`}
+                    {mode === 'price' && `💰 ${t('sortByPrice', 'Price')}`}
+                    {mode === 'rating' && `⭐ ${t('sortByRating', 'Rating')}`}
                   </button>
                 ))}
               </div>
@@ -1163,10 +1165,10 @@ export const AllCheckupsScreen: React.FC = () => {
           {/* Laboratories Available Counter Banner */}
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-extrabold text-[#172B4D]">
-              {nearbyLabs.length} Laboratories available near {currentCity}
+              {nearbyLabs.length} {t('laboratoriesAvailable', 'laboratories available near you')}
             </span>
             <span className="text-[11px] text-slate-400">
-              Verified Pathology Centers
+              {t('certifiedNablLabs', 'Verified Pathology Centers')}
             </span>
           </div>
 
@@ -1257,7 +1259,7 @@ export const AllCheckupsScreen: React.FC = () => {
                             </span>
                             <span className="text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded flex items-center gap-0.5">
                               <ShieldCheck className="w-3 h-3 text-[#087E8B]" />
-                              Verified • NABL
+                              {t('verified', 'Verified')} • NABL
                             </span>
                           </div>
 
@@ -1291,7 +1293,7 @@ export const AllCheckupsScreen: React.FC = () => {
                     {/* Metadata Row: Distance, Hours, Rating & Phone */}
                     <div className="grid grid-cols-3 gap-2 bg-slate-50/80 p-2.5 rounded-2xl text-[11px] border border-slate-100">
                       <div>
-                        <span className="text-slate-400 block text-[10px]">Distance & Drive</span>
+                        <span className="text-slate-400 block text-[10px]">{t('sortByDistance', 'Distance & Drive')}</span>
                         <span className="font-bold text-[#172B4D] flex items-center gap-1 mt-0.5">
                           <Navigation className="w-3 h-3 text-[#087E8B]" />
                           {lab.distanceStr}
@@ -1300,16 +1302,16 @@ export const AllCheckupsScreen: React.FC = () => {
                       </div>
 
                       <div>
-                        <span className="text-slate-400 block text-[10px]">Opening Hours</span>
+                        <span className="text-slate-400 block text-[10px]">{t('openingHours', 'Opening Hours')}</span>
                         <span className="font-bold text-[#172B4D] flex items-center gap-1 mt-0.5">
                           <Clock className="w-3 h-3 text-amber-500" />
                           {lab.openingTime} - {lab.closingTime}
                         </span>
-                        <span className="text-[10px] text-emerald-600 font-semibold">Open Today</span>
+                        <span className="text-[10px] text-emerald-600 font-semibold">{t('open', 'Open Today')}</span>
                       </div>
 
                       <div>
-                        <span className="text-slate-400 block text-[10px]">Rating & Reviews</span>
+                        <span className="text-slate-400 block text-[10px]">{t('reviews', 'Rating & Reviews')}</span>
                         <div className="flex items-center gap-1 font-bold text-[#172B4D] mt-0.5">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                           <span>{lab.rating}</span>
@@ -1331,18 +1333,18 @@ export const AllCheckupsScreen: React.FC = () => {
                         {lab.homeCollectionAvailable ? (
                           <span className="text-[11px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1">
                             <Home className="w-3 h-3 text-blue-600" />
-                            <span>Home Collection ({lab.homeCollectionFee === 0 ? 'FREE' : `₹${lab.homeCollectionFee}`})</span>
+                            <span>{t('homeSampleCollection', 'Home Collection')} ({lab.homeCollectionFee === 0 ? 'FREE' : `₹${lab.homeCollectionFee}`})</span>
                           </span>
                         ) : (
                           <span className="text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            Lab Visit Only
+                            {t('labVisit', 'Lab Visit Only')}
                           </span>
                         )}
                       </div>
 
                       <div className="text-right">
                         <div className="flex items-baseline gap-1.5 justify-end">
-                          <span className="text-xs text-slate-400">Test Price:</span>
+                          <span className="text-xs text-slate-400">{t('sortByPrice', 'Test Price')}:</span>
                           <span className="font-extrabold text-base text-[#172B4D]">
                             ₹{lab.totalSelectedPrice}
                           </span>
@@ -1364,7 +1366,7 @@ export const AllCheckupsScreen: React.FC = () => {
                         title={`Call ${lab.phone}`}
                       >
                         <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Call ({lab.phone})</span>
+                        <span>{t('call', 'Call')} ({lab.phone})</span>
                       </a>
 
                       <button
@@ -1372,14 +1374,14 @@ export const AllCheckupsScreen: React.FC = () => {
                         className="flex-1 py-2 rounded-xl border border-[#087E8B]/30 bg-teal-50 hover:bg-teal-100 text-[#087E8B] text-xs font-extrabold flex items-center justify-center gap-1.5 transition-colors"
                       >
                         <Navigation className="w-3.5 h-3.5" />
-                        <span>View Location</span>
+                        <span>{t('viewLocation', 'View Location')}</span>
                       </button>
 
                       <button
                         onClick={() => handleChooseLabToBook(lab)}
                         className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#087E8B] to-[#172B4D] hover:from-[#076d78] hover:to-[#12223c] text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-md transition-all"
                       >
-                        <span>Book Test</span>
+                        <span>{t('bookTest', 'Book Test')}</span>
                         <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
@@ -1543,9 +1545,9 @@ export const AllCheckupsScreen: React.FC = () => {
                   )}
                 </div>
                 <div className="mt-2">
-                  <h5 className="font-extrabold text-xs text-[#172B4D]">Visit Diagnostic Lab</h5>
+                  <h5 className="font-extrabold text-xs text-[#172B4D]">{t('visitDiagnosticLab', 'Visit Diagnostic Lab')}</h5>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    Visit centre directly at selected time slot. No waiting.
+                    {t('walkInLabDesc', 'Visit centre directly at selected time slot. Instant slot token provided.')}
                   </p>
                 </div>
               </button>
@@ -1572,7 +1574,7 @@ export const AllCheckupsScreen: React.FC = () => {
                 </div>
                 <div className="mt-2">
                   <div className="flex items-center gap-1">
-                    <h5 className="font-extrabold text-xs text-[#172B4D]">Home Sample Collection</h5>
+                    <h5 className="font-extrabold text-xs text-[#172B4D]">{t('homeCollectionOption', 'Home Sample Collection')}</h5>
                     {chosenLab.homeCollectionFee === 0 && (
                       <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1 py-0.2 rounded">
                         FREE
@@ -1580,7 +1582,7 @@ export const AllCheckupsScreen: React.FC = () => {
                     )}
                   </div>
                   <p className="text-[10px] text-slate-500 mt-0.5">
-                    Trained certified phlebotomist visits your doorstep.
+                    {t('homeCollectionDesc', 'Trained certified phlebotomist visits your doorstep at your preferred time.')}
                   </p>
                 </div>
               </button>
@@ -1590,7 +1592,7 @@ export const AllCheckupsScreen: React.FC = () => {
               <div className="mt-3 p-3 bg-blue-50/60 rounded-2xl border border-blue-100 space-y-2 animate-fadeIn">
                 <label className="text-xs font-bold text-blue-950 flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5 text-blue-700" />
-                  <span>Doorstep Collection Address:</span>
+                  <span>{t('sampleCollectionAddress', 'Doorstep Collection Address')}:</span>
                 </label>
                 <textarea
                   value={patientAddress}
@@ -1607,7 +1609,7 @@ export const AllCheckupsScreen: React.FC = () => {
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-2.5">
             <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-[#087E8B]" />
-              <span>Select Appointment Date</span>
+              <span>{t('selectAppointmentDate', 'Select Appointment Date')}</span>
             </h4>
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
               {appointmentDates.map((item) => (
@@ -1640,11 +1642,8 @@ export const AllCheckupsScreen: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wider flex items-center gap-1">
                   <Clock className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Morning Fasting Slots (Recommended)</span>
+                  <span>{t('morningFastingSlots', 'Morning Fasting Slots (Recommended)')}</span>
                 </h4>
-                <span className="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-bold">
-                  Ideal for Sugar & Lipid
-                </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                 {morningFastingSlots.map((slot) => (
@@ -1666,7 +1665,7 @@ export const AllCheckupsScreen: React.FC = () => {
 
             <div className="pt-2 border-t border-slate-100">
               <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider">
-                Regular Day Slots
+                {t('regularSlots', 'Regular Day Slots')}
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                 {daytimeSlots.map((slot) => (
@@ -1690,12 +1689,12 @@ export const AllCheckupsScreen: React.FC = () => {
           {/* Patient Details Form */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3">
             <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wider">
-              Patient Details
+              {t('patientDetails', 'Patient Details')}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
-                  Patient Full Name *
+                  {t('patientName', 'Patient Full Name')} *
                 </label>
                 <input
                   type="text"
@@ -1708,7 +1707,7 @@ export const AllCheckupsScreen: React.FC = () => {
 
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
-                  Mobile Number *
+                  {t('contactNumber', 'Mobile Number')} *
                 </label>
                 <input
                   type="tel"
@@ -1721,7 +1720,7 @@ export const AllCheckupsScreen: React.FC = () => {
 
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
-                  Age (Years) *
+                  {t('age', 'Age')} *
                 </label>
                 <input
                   type="number"
@@ -1734,7 +1733,7 @@ export const AllCheckupsScreen: React.FC = () => {
 
               <div>
                 <label className="text-xs font-bold text-slate-600 block mb-1">
-                  Gender *
+                  {t('gender', 'Gender')} *
                 </label>
                 <div className="flex gap-2">
                   {(['Male', 'Female', 'Other'] as const).map((g) => (
@@ -1748,7 +1747,7 @@ export const AllCheckupsScreen: React.FC = () => {
                           : 'border-slate-200 text-slate-600'
                       }`}
                     >
-                      {g}
+                      {g === 'Male' ? t('male', 'Male') : g === 'Female' ? t('female', 'Female') : t('other', 'Other')}
                     </button>
                   ))}
                 </div>
@@ -1764,7 +1763,7 @@ export const AllCheckupsScreen: React.FC = () => {
                   className="rounded text-[#087E8B] focus:ring-[#087E8B] w-4 h-4 mt-0.5"
                 />
                 <span>
-                  I confirm that the patient will maintain {maxFastingHours > 0 ? `${maxFastingHours} hours` : 'overnight'} fasting prior to blood sample collection.
+                  {t('fastingInstructions', 'I confirm that the patient will maintain fasting prior to blood sample collection.')}
                 </span>
               </label>
             )}
@@ -1773,7 +1772,7 @@ export const AllCheckupsScreen: React.FC = () => {
           {/* Payment Choice */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-2.5">
             <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wider">
-              Payment Method
+              {t('paymentMethod', 'Payment Method')}
             </h4>
             <div className="grid grid-cols-2 gap-2.5">
               <button
@@ -1786,10 +1785,10 @@ export const AllCheckupsScreen: React.FC = () => {
                 }`}
               >
                 <span className="font-extrabold text-xs text-[#172B4D] block">
-                  Pay at Centre / Cash
+                  {t('payAtCollection', 'Pay at Centre / Cash')}
                 </span>
                 <span className="text-[10px] text-slate-500 mt-0.5 block">
-                  Pay after sample collection via UPI or Cash
+                  UPI or Cash
                 </span>
               </button>
 
@@ -1803,10 +1802,10 @@ export const AllCheckupsScreen: React.FC = () => {
                 }`}
               >
                 <span className="font-extrabold text-xs text-[#172B4D] block">
-                  Pay Online (Instant)
+                  {t('payOnline', 'Pay Online Now')}
                 </span>
                 <span className="text-[10px] text-slate-500 mt-0.5 block">
-                  Google Pay, PhonePe, Cards or Netbanking
+                  UPI, Cards or Netbanking
                 </span>
               </button>
             </div>
@@ -1818,7 +1817,7 @@ export const AllCheckupsScreen: React.FC = () => {
             className="w-full py-3.5 bg-gradient-to-r from-[#087E8B] to-[#172B4D] hover:from-[#076d78] hover:to-[#12223c] text-white font-extrabold text-sm rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             <span>
-              Confirm & Book (₹{(selectedPackage ? selectedPackage.price : chosenLab.totalSelectedPrice) +
+              {t('confirmTestBooking', 'Confirm & Book Test')} (₹{(selectedPackage ? selectedPackage.price : chosenLab.totalSelectedPrice) +
                 (collectionMethod === 'HOME_COLLECTION' ? chosenLab.homeCollectionFee : 0)})
             </span>
             <ArrowRight className="w-4 h-4" />
@@ -1838,27 +1837,27 @@ export const AllCheckupsScreen: React.FC = () => {
             </div>
 
             <span className="inline-block bg-emerald-50 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200">
-              Booking Confirmed
+              {t('bookingConfirmed', 'Booking Confirmed')}
             </span>
 
             <h2 className="text-lg font-black text-[#172B4D]">
-              Diagnostic Checkup Scheduled!
+              {t('bookingConfirmed', 'Diagnostic Checkup Scheduled!')}
             </h2>
 
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Your appointment has been registered with {confirmedBookingResult.lab?.name}. Digital confirmation has been sent to {patientPhone}.
+              Your appointment has been registered with {confirmedBookingResult.lab?.name}.
             </p>
 
             {/* Booking Code Token */}
             <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-3 max-w-xs mx-auto">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
-                Booking Reference Token
+                {t('bookingRef', 'Booking Reference Token')}
               </span>
               <span className="text-base font-black text-[#087E8B] tracking-wider block mt-0.5">
                 {confirmedBookingResult.bookingCode || 'DG-LAB-8419'}
               </span>
               <span className="text-[10px] text-slate-400 block mt-1">
-                Show this token at the laboratory desk
+                {t('barcodeTokenNotice', 'Show this digital token / barcode upon arrival')}
               </span>
             </div>
           </div>
@@ -1866,33 +1865,33 @@ export const AllCheckupsScreen: React.FC = () => {
           {/* Details Summary Card */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs space-y-3 text-xs">
             <h4 className="font-bold text-slate-700 uppercase tracking-wider">
-              Booking Information
+              {t('myAppointments', 'Booking Information')}
             </h4>
 
             <div className="grid grid-cols-2 gap-3 pb-3 border-b border-slate-100">
               <div>
-                <span className="text-slate-400 text-[10px] block">Patient Name</span>
+                <span className="text-slate-400 text-[10px] block">{t('patientName', 'Patient Name')}</span>
                 <span className="font-bold text-[#172B4D]">{patientName} ({patientAge}y, {patientGender})</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Mobile</span>
+                <span className="text-slate-400 text-[10px] block">{t('contactNumber', 'Mobile')}</span>
                 <span className="font-bold text-[#172B4D]">{patientPhone}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Scheduled Slot</span>
+                <span className="text-slate-400 text-[10px] block">{t('selectTimeSlot', 'Scheduled Slot')}</span>
                 <span className="font-bold text-[#172B4D]">{selectedDate} • {selectedSlot}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] block">Collection Mode</span>
+                <span className="text-slate-400 text-[10px] block">{t('collectionType', 'Collection Mode')}</span>
                 <span className="font-bold text-[#087E8B]">
-                  {collectionMethod === 'HOME_COLLECTION' ? 'Doorstep Home Collection' : 'Diagnostic Lab Visit'}
+                  {collectionMethod === 'HOME_COLLECTION' ? t('homeCollectionOption', 'Home Collection') : t('visitDiagnosticLab', 'Lab Visit')}
                 </span>
               </div>
             </div>
 
             {/* Lab & Address */}
             <div>
-              <span className="text-slate-400 text-[10px] block">Laboratory Facility</span>
+              <span className="text-slate-400 text-[10px] block">{t('selectedTestSummary', 'Laboratory Facility')}</span>
               <span className="font-bold text-[#172B4D] block">{confirmedBookingResult.lab?.name}</span>
               <span className="text-slate-500 text-[11px] block mt-0.5">
                 {confirmedBookingResult.lab?.address}, {confirmedBookingResult.lab?.area}, {confirmedBookingResult.lab?.city}
@@ -1903,15 +1902,11 @@ export const AllCheckupsScreen: React.FC = () => {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-amber-900 space-y-1">
               <p className="font-bold flex items-center gap-1">
                 <Info className="w-3.5 h-3.5 text-amber-700" />
-                <span>Preparation Instructions:</span>
+                <span>{t('preparationGuidelines', 'Preparation Instructions')}:</span>
               </p>
-              <ul className="list-disc list-inside space-y-0.5 text-[11px] text-amber-800">
-                {anyFastingRequired && (
-                  <li>Maintain 8-10 hours overnight fasting. You may drink plain water.</li>
-                )}
-                <li>Avoid heavy fatty meals, alcohol, or smoking 12 hours prior to test.</li>
-                <li>Carry a valid photo ID (Aadhaar or Voter ID).</li>
-              </ul>
+              <p className="text-[11px] text-amber-800">
+                {t('fastingInstructions')}
+              </p>
             </div>
           </div>
 
@@ -1923,7 +1918,7 @@ export const AllCheckupsScreen: React.FC = () => {
                 className="w-full py-3 bg-[#087E8B] hover:bg-[#076d78] text-white font-extrabold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-colors"
               >
                 <Navigation className="w-4 h-4" />
-                <span>Get Driving Directions to Lab</span>
+                <span>{t('getDirectionsToLab', 'Get Driving Directions to Lab')}</span>
               </button>
             )}
 
@@ -1931,7 +1926,7 @@ export const AllCheckupsScreen: React.FC = () => {
               onClick={() => navigateTo('my-bookings')}
               className="w-full py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-extrabold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-colors"
             >
-              <span>View in My Bookings</span>
+              <span>{t('viewInMyBookings', 'View in My Bookings')}</span>
             </button>
 
             <button
@@ -1942,7 +1937,7 @@ export const AllCheckupsScreen: React.FC = () => {
               }}
               className="w-full py-2.5 text-slate-500 hover:text-slate-800 font-bold text-xs"
             >
-              Book Another Checkup
+              {t('allCheckupsTitle', 'Book Another Checkup')}
             </button>
           </div>
         </div>

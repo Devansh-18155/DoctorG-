@@ -30,7 +30,12 @@ import {
   HOSPITALS,
   DOCTORS,
 } from '../data/mockData';
-import { TRANSLATIONS, SUPPORTED_LANGUAGES } from '../translations';
+import {
+  TRANSLATIONS,
+  SUPPORTED_LANGUAGES,
+  LANGUAGE_STORAGE_KEY,
+  getTranslation,
+} from '../translations';
 
 export interface ToastMessage {
   id: string;
@@ -58,7 +63,7 @@ interface AppContextType {
   // Language & Translations
   currentLanguage: LanguageCode;
   setCurrentLanguage: (lang: LanguageCode) => void;
-  t: (key: string) => string;
+  t: (key: string, fallback?: string) => string;
 
   // Authentication & User
   user: UserProfile | null;
@@ -193,8 +198,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [screenHistory, setScreenHistory] = useState<Array<{ screen: string; params?: any }>>([]);
   const [activeBottomTab, setActiveBottomTab] = useState<'home' | 'my-bookings' | 'health' | 'notifications' | 'profile'>('home');
 
-  // Language
-  const [currentLanguage, setCurrentLanguage] = useState<LanguageCode>('en');
+  // Language (Initialized from persistent storage)
+  const [currentLanguage, setCurrentLanguageState] = useState<LanguageCode>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY) as LanguageCode | null;
+        if (saved && TRANSLATIONS[saved]) {
+          return saved;
+        }
+      } catch (e) {
+        // Fallback gracefully
+      }
+    }
+    return 'en';
+  });
+
+  // Persistent Language Switcher
+  const setCurrentLanguage = (lang: LanguageCode) => {
+    setCurrentLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+        document.documentElement.lang = lang;
+        document.documentElement.dir = lang === 'ur' ? 'rtl' : 'ltr';
+      } catch (e) {
+        // LocalStorage quota or access error handling
+      }
+    }
+    setUser((prev) => (prev ? { ...prev, preferredLanguage: lang } : null));
+  };
+
+  // Sync document language on mount & whenever currentLanguage changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.lang = currentLanguage;
+      document.documentElement.dir = currentLanguage === 'ur' ? 'rtl' : 'ltr';
+    }
+  }, [currentLanguage]);
 
   // Auth & Guest
   const [user, setUser] = useState<UserProfile | null>(DEFAULT_USER);
@@ -340,10 +380,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [currentScreen]);
 
-  // Translation helper
-  const t = (key: string): string => {
-    const langDict = TRANSLATIONS[currentLanguage] || TRANSLATIONS.en;
-    return langDict[key] || TRANSLATIONS.en[key] || key;
+  // Global Translation helper with fallback support
+  const t = (key: string, fallback?: string): string => {
+    return getTranslation(key, currentLanguage, fallback);
   };
 
   // Toast Helpers

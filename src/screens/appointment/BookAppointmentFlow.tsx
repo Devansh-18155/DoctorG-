@@ -100,6 +100,7 @@ export const BookAppointmentFlow: React.FC = () => {
     addAppointment,
     requireAuth,
     showToast,
+    t,
   } = useApp();
 
   // If user selected a specific doctor from outside (e.g. Find Doctor screen), jump to slot selection (step 5)
@@ -496,11 +497,11 @@ export const BookAppointmentFlow: React.FC = () => {
             className="flex items-center gap-1 text-slate-600 hover:text-[#172B4D] text-xs font-bold transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>{currentStep === 8 ? 'Home' : 'Back'}</span>
+            <span>{currentStep === 8 ? t('home', 'Home') : t('back', 'Back')}</span>
           </button>
 
           <span className="text-xs font-black text-[#172B4D]">
-            {currentStep === 8 ? 'Official Slip' : `Step ${currentStep} of 7`}
+            {currentStep === 8 ? t('officialSlip', 'Official Slip') : `Step ${currentStep} of 7`}
           </span>
 
           <span className="text-[10px] font-extrabold text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/80">
@@ -525,10 +526,10 @@ export const BookAppointmentFlow: React.FC = () => {
           <div className="space-y-4 animate-in fade-in">
             <div>
               <h2 className="text-xl font-black text-[#172B4D] tracking-tight">
-                Choose Your Location
+                {t('selectMedicalLocation', 'Choose Your Location')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5 font-medium">
-                Find hospitals and clinics near you.
+                {t('findHospitalsDoctors', 'Find hospitals and clinics near you.')}
               </p>
             </div>
 
@@ -652,7 +653,7 @@ export const BookAppointmentFlow: React.FC = () => {
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="text-xl font-black text-[#172B4D] tracking-tight">
-                  Select Your Department
+                  {t('chooseSpeciality', 'Select Your Department')}
                 </h2>
                 <p className="text-xs text-slate-600 mt-1 font-medium flex items-center gap-1.5 flex-wrap">
                   <span>Choose medical department for consultation in</span>
@@ -1100,7 +1101,7 @@ export const BookAppointmentFlow: React.FC = () => {
                 <span>{selectedDepartment.name}</span>
               </div>
               <h2 className="text-xl font-black text-[#172B4D] tracking-tight">
-                Choose Doctor
+                {t('selectDoctor', 'Choose Doctor')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5 font-medium">
                 Experienced {selectedDepartment.name} consultants available for consultation
@@ -1330,7 +1331,7 @@ export const BookAppointmentFlow: React.FC = () => {
           <div className="space-y-4 animate-in fade-in">
             <div>
               <h2 className="text-xl font-black text-[#172B4D] tracking-tight">
-                Patient Information
+                {t('patientDetails', 'Patient Information')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Hospital OPD token and patient number will be registered under this name
@@ -1420,7 +1421,7 @@ export const BookAppointmentFlow: React.FC = () => {
           <div className="space-y-4 animate-in fade-in">
             <div>
               <h2 className="text-xl font-black text-[#172B4D] tracking-tight">
-                Review & Confirm Booking
+                {t('paymentMethod', 'Review & Confirm Booking')}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Review appointment details and choose payment method
@@ -1538,7 +1539,7 @@ export const BookAppointmentFlow: React.FC = () => {
                 <CheckCircle2 className="w-7 h-7 stroke-[2.5]" />
               </div>
               <h3 className="font-black text-base tracking-tight">
-                Appointment Officially Confirmed!
+                {t('bookingConfirmed', 'Appointment Officially Confirmed!')}
               </h3>
               <p className="text-xs text-emerald-100 font-medium">
                 Your consultation slip has been issued by {selectedHospital.name}

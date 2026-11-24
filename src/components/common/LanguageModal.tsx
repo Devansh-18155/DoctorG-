@@ -11,9 +11,16 @@ interface LanguageModalProps {
 }
 
 export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose }) => {
-  const { currentLanguage, setCurrentLanguage, showToast } = useApp();
+  const { currentLanguage, setCurrentLanguage, showToast, t } = useApp();
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<LanguageCode>(currentLanguage);
+
+  // Sync selected with currentLanguage when opening
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelected(currentLanguage);
+    }
+  }, [isOpen, currentLanguage]);
 
   if (!isOpen) return null;
 
@@ -26,7 +33,7 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
   const handleApply = () => {
     setCurrentLanguage(selected);
     const chosen = SUPPORTED_LANGUAGES.find((l) => l.code === selected);
-    showToast(`Language switched to ${chosen?.name} (${chosen?.nativeName})`, 'success');
+    showToast(`✓ Language set to ${chosen?.name} (${chosen?.nativeName})`, 'success');
     onClose();
   };
 
@@ -40,8 +47,8 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
               <Globe className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-[#172B4D]">Choose Language</h3>
-              <p className="text-[11px] text-slate-500">13 Official Indian Languages</p>
+              <h3 className="font-bold text-sm text-[#172B4D]">{t('chooseLanguage', 'Choose Language')}</h3>
+              <p className="text-[11px] text-slate-500">{t('thirteenLanguages', '13 Official Indian Languages')}</p>
             </div>
           </div>
           <button
@@ -59,7 +66,7 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
             onChange={(e) => setSearch(e.target.value)}
             onChangeValue={setSearch}
             onClear={() => setSearch('')}
-            placeholder="Search language / भाषा खोजें..."
+            placeholder={t('searchLanguage', 'Search language / भाषा खोजें...')}
             searchCategory="general"
             inputClassName="bg-slate-50"
           />
@@ -99,7 +106,7 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
             onClick={handleApply}
             className="w-full py-2.5 bg-[#087E8B] hover:bg-[#06626D] text-white rounded-xl font-semibold text-xs shadow-md shadow-teal-700/20 transition-all"
           >
-            Apply & Continue
+            {t('continue', 'Apply & Continue')}
           </button>
         </div>
       </div>

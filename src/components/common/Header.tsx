@@ -27,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
     notifications,
     navigateTo,
     currentLanguage,
+    t,
   } = useApp();
 
   const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
@@ -46,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
             className="h-10 sm:h-11 w-auto max-w-[140px] object-contain rounded-lg group-hover:scale-102 transition-transform"
           />
           <span className="bg-emerald-100 text-emerald-800 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full flex-shrink-0 self-center">
-            Live
+            {t('live', 'Live')}
           </span>
         </div>
 
@@ -56,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
           <button
             onClick={onOpenLanguage}
             className="p-1.5 rounded-full hover:bg-slate-100 text-slate-600 transition-colors relative"
-            title="Select Language"
+            title={t('selectLanguage', 'Select Language')}
           >
             <Globe className="w-4 h-4 text-slate-700" />
             <span className="absolute -bottom-0.5 -right-0.5 bg-teal-600 text-white text-[9px] font-bold px-1 rounded-full uppercase leading-tight">
@@ -68,7 +69,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
           <button
             onClick={() => navigateTo('notifications')}
             className="p-1.5 rounded-full hover:bg-slate-100 text-slate-600 transition-colors relative"
-            title="Notifications"
+            title={t('notifications', 'Notifications')}
           >
             <Bell className="w-4 h-4 text-slate-700" />
             {unreadNotificationsCount > 0 && (
@@ -82,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
           <button
             onClick={() => navigateTo('profile')}
             className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 flex items-center justify-center bg-slate-100 hover:ring-2 hover:ring-teal-500 transition-all ml-0.5"
-            title="Profile & Settings"
+            title={t('profile', 'Profile & Settings')}
           >
             {user?.avatarUrl ? (
               <img
@@ -100,9 +101,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
       {/* Second row: Greeting & Location selector */}
       <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-slate-50 text-xs">
         <div>
-          <span className="text-slate-400">Hello, </span>
+          <span className="text-slate-400">{t('hello', 'Hello')}, </span>
           <span className="font-bold text-[#172B4D]">
-            {isGuest ? 'Guest User' : user?.name.split(' ')[0] || 'User'}
+            {isGuest ? t('guestUser', 'Guest User') : user?.name.split(' ')[0] || 'User'}
           </span>
           <span className="ml-1 text-slate-400">👋</span>
         </div>
@@ -126,7 +127,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
 
           <div className="flex flex-col items-start leading-tight text-left">
             <span className="text-[9px] uppercase font-extrabold text-teal-700 tracking-wider">
-              {isDetectingLocation ? 'Locating...' : isLiveLocation ? 'Live GPS Location' : 'Location'}
+              {isDetectingLocation ? t('locating', 'Locating...') : isLiveLocation ? t('liveGpsLocation', 'Live GPS Location') : t('location', 'Location')}
             </span>
             <span className="font-bold text-[11px] text-[#172B4D] max-w-[140px] truncate">
               {formatLocationName(currentArea, currentCity)}

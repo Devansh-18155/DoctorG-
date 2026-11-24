@@ -11,6 +11,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { SPEECH_LANG_MAP } from '../../translations';
 
 interface VoiceSearchModalProps {
   isOpen: boolean;
@@ -23,9 +24,15 @@ const VOICE_LANGUAGES = [
   { code: 'hi-IN', label: 'Hindi', native: 'हिन्दी' },
   { code: 'bn-IN', label: 'Bengali', native: 'বাংলা' },
   { code: 'mr-IN', label: 'Marathi', native: 'मराठी' },
-  { code: 'gu-IN', label: 'Gujarati', native: 'ગુજરાતી' },
   { code: 'ta-IN', label: 'Tamil', native: 'தமிழ்' },
   { code: 'te-IN', label: 'Telugu', native: 'తెలుగు' },
+  { code: 'kn-IN', label: 'Kannada', native: 'ಕನ್ನಡ' },
+  { code: 'ml-IN', label: 'Malayalam', native: 'മലയാളം' },
+  { code: 'gu-IN', label: 'Gujarati', native: 'ગુજરાતી' },
+  { code: 'pa-IN', label: 'Punjabi', native: 'ਪੰਜਾਬੀ' },
+  { code: 'or-IN', label: 'Odia', native: 'ଓଡ଼ିଆ' },
+  { code: 'as-IN', label: 'Assamese', native: 'অসমীয়া' },
+  { code: 'ur-IN', label: 'Urdu', native: 'اردو' },
 ];
 
 const SUGGESTED_VOICE_QUERIES = [
@@ -48,25 +55,15 @@ export const VoiceSearchModal: React.FC<VoiceSearchModalProps> = ({
 
   // Pick default recognition language based on app language
   const getDefaultLangCode = () => {
-    switch (currentLanguage) {
-      case 'hi':
-        return 'hi-IN';
-      case 'bn':
-        return 'bn-IN';
-      case 'mr':
-        return 'mr-IN';
-      case 'gu':
-        return 'gu-IN';
-      case 'ta':
-        return 'ta-IN';
-      case 'te':
-        return 'te-IN';
-      default:
-        return 'en-IN';
-    }
+    return SPEECH_LANG_MAP[currentLanguage] || 'en-IN';
   };
 
   const [selectedLang, setSelectedLang] = useState<string>(getDefaultLangCode());
+
+  // Keep recognition language synced with global currentLanguage
+  useEffect(() => {
+    setSelectedLang(getDefaultLangCode());
+  }, [currentLanguage, isOpen]);
   const [isListening, setIsListening] = useState<boolean>(false);
   const [transcript, setTranscript] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

@@ -31,15 +31,16 @@ export const ProfileScreen: React.FC = () => {
     navigateTo,
     showConfirmDialog,
     currentLanguage,
+    t,
   } = useApp();
 
   const [isLangOpen, setIsLangOpen] = useState(false);
 
   const handleLogout = () => {
     showConfirmDialog({
-      title: 'Sign Out?',
-      message: 'Are you sure you want to sign out of your Doctor G account?',
-      confirmLabel: 'Sign Out',
+      title: t('signOut', 'Sign Out') + '?',
+      message: t('signOutConfirm', 'Are you sure you want to sign out of your Doctor G account?'),
+      confirmLabel: t('signOut', 'Sign Out'),
       isDestructive: true,
       onConfirm: logout,
     });
@@ -49,7 +50,7 @@ export const ProfileScreen: React.FC = () => {
     <div className="min-h-full pb-20 bg-[#F6F8FA]">
       {/* Profile Header */}
       <div className="bg-white border-b border-slate-100 p-5 sticky top-0 z-20 shadow-2xs">
-        <h1 className="text-lg font-extrabold text-[#172B4D]">My Profile</h1>
+        <h1 className="text-lg font-extrabold text-[#172B4D]">{t('myProfile', 'My Profile')}</h1>
 
         {/* User Card */}
         <div className="flex items-center gap-3.5 mt-4">
@@ -67,13 +68,13 @@ export const ProfileScreen: React.FC = () => {
 
           <div className="flex-1 min-w-0">
             <h3 className="font-extrabold text-base text-[#172B4D] truncate">
-              {isGuest ? 'Guest User' : user?.name || 'User'}
+              {isGuest ? t('guestUser', 'Guest User') : user?.name || t('user', 'User')}
             </h3>
             <p className="text-xs text-slate-500 font-medium truncate">
-              {isGuest ? 'Browsing without account' : user?.phone}
+              {isGuest ? t('browsingWithoutAccount', 'Browsing without account') : user?.phone}
             </p>
             <p className="text-[11px] text-teal-700 font-semibold truncate">
-              {isGuest ? 'Tap to Sign In' : user?.email}
+              {isGuest ? t('tapToSignIn', 'Tap to Sign In') : user?.email}
             </p>
           </div>
 
@@ -81,7 +82,7 @@ export const ProfileScreen: React.FC = () => {
             <button
               onClick={() => navigateTo('edit-profile')}
               className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl"
-              title="Edit Profile"
+              title={t('editProfile', 'Edit Profile')}
             >
               <Edit3 className="w-4 h-4" />
             </button>
@@ -93,7 +94,7 @@ export const ProfileScreen: React.FC = () => {
             onClick={() => loginAsPatient(false)}
             className="w-full mt-4 py-2.5 bg-[#087E8B] hover:bg-[#06626D] text-white rounded-xl font-bold text-xs shadow-xs"
           >
-            Sign In / Create Account
+            {t('signInOrCreate', 'Sign In / Create Account')}
           </button>
         )}
       </div>
@@ -107,7 +108,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <User className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Personal Information</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('personalInfo', 'Personal Information')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -118,7 +119,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <MapPin className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Saved Delivery Addresses</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('savedAddresses', 'Saved Delivery Addresses')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -129,7 +130,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Users className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Family Members</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('familyHealth', 'Family Members')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -140,7 +141,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <FileText className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">My Health Records</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('healthRecords', 'My Health Records')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -151,7 +152,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <CreditCard className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Payment History & Invoices</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('paymentHistory', 'Payment History & Invoices')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -162,7 +163,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Star className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Ratings & Doctor Reviews</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('doctorReviews', 'Ratings & Doctor Reviews')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -176,9 +177,9 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Globe className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Language Preference</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('selectLanguage', 'Language Preference')}</span>
             </div>
-            <span className="text-xs font-bold text-teal-700 uppercase">
+            <span className="text-xs font-bold text-teal-700 uppercase bg-teal-50 px-2.5 py-1 rounded-full">
               {currentLanguage} →
             </span>
           </button>
@@ -189,7 +190,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <Bell className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Notification Alerts</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('notifications', 'Notification Alerts')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -200,7 +201,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <HelpCircle className="w-4 h-4 text-teal-700" />
-              <span className="text-xs font-bold text-[#172B4D]">Help & Customer Support</span>
+              <span className="text-xs font-bold text-[#172B4D]">{t('helpSupport', 'Help & Customer Support')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -211,7 +212,7 @@ export const ProfileScreen: React.FC = () => {
           >
             <div className="flex items-center gap-3">
               <ShieldAlert className="w-4 h-4 text-rose-600" />
-              <span className="text-xs font-bold text-rose-700">24x7 Emergency Help Hub</span>
+              <span className="text-xs font-bold text-rose-700">{t('emergencyNotice', '24x7 Emergency Help Hub')}</span>
             </div>
             <ChevronRight className="w-4 h-4 text-slate-400" />
           </button>
@@ -224,7 +225,7 @@ export const ProfileScreen: React.FC = () => {
             className="w-full py-3 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            <span>Sign Out of Doctor G</span>
+            <span>{t('signOut', 'Sign Out of Doctor G')}</span>
           </button>
         )}
 

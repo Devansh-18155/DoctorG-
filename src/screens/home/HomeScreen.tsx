@@ -75,42 +75,42 @@ export const HomeScreen: React.FC = () => {
   const SERVICES = [
     {
       id: 'book-appointment',
-      title: t('bookAppointment') || 'Book Appointment',
-      subtitle: 'Hospitals & Clinics',
+      title: t('bookAppointment', 'Book Appointment'),
+      subtitle: t('hospitalsClinics', 'Hospitals & Clinics'),
       icon: CalendarDays,
       bgGradient: 'from-teal-50 to-emerald-50',
       iconColor: 'text-teal-700',
-      badge: 'Queue Live',
+      badge: t('queueLive', 'Queue Live'),
       screen: 'book-appointment',
     },
     {
       id: 'find-ambulance',
-      title: t('findAmbulance') || 'Find Ambulance',
-      subtitle: 'Emergency & ALS',
+      title: t('findAmbulance', 'Find Ambulance'),
+      subtitle: t('emergencyAls', 'Emergency & ALS'),
       icon: Ambulance,
       bgGradient: 'from-rose-50 to-red-50',
       iconColor: 'text-rose-600',
-      badge: '8 min ETA',
+      badge: t('etaMin', '8 min ETA'),
       screen: 'find-ambulance',
     },
     {
       id: 'all-checkups',
-      title: t('allCheckups') || 'All Checkups',
-      subtitle: 'Diagnostics & Lab Tests',
+      title: t('allCheckups', 'All Checkups'),
+      subtitle: t('diagnosticsLabTests', 'Diagnostics & Lab Tests'),
       icon: PackagePlus,
       bgGradient: 'from-indigo-50 to-purple-50',
       iconColor: 'text-indigo-700',
-      badge: 'Up to 60% OFF',
+      badge: t('upToDiscount', 'Up to 60% OFF'),
       screen: 'all-checkups',
     },
     {
       id: 'traditional-healing',
-      title: t('traditionalHealing') || 'Traditional Healing',
-      subtitle: 'Ayurveda & Holistic',
+      title: t('traditionalHealing', 'Traditional Healing'),
+      subtitle: t('ayurvedaHolistic', 'Ayurveda & Holistic'),
       icon: Flower2,
       bgGradient: 'from-emerald-50 to-teal-50',
       iconColor: 'text-emerald-700',
-      badge: 'Guidance',
+      badge: t('guidance', 'Guidance'),
       screen: 'traditional-healing',
     },
   ];
@@ -119,28 +119,28 @@ export const HomeScreen: React.FC = () => {
   const SHORTCUTS = [
     {
       id: 'records',
-      title: 'Health Records',
+      title: t('healthRecords', 'Health Records'),
       icon: FileText,
       screen: 'health-records',
       color: 'bg-blue-50 text-blue-700',
     },
     {
       id: 'reminders',
-      title: 'Medicine Reminder',
+      title: t('medicineReminder', 'Medicine Reminder'),
       icon: Clock,
       screen: 'reminders',
       color: 'bg-emerald-50 text-emerald-700',
     },
     {
       id: 'family',
-      title: 'Family Health',
+      title: t('familyHealth', 'Family Health'),
       icon: Users,
       screen: 'family-health',
       color: 'bg-purple-50 text-purple-700',
     },
     {
       id: 'tracker',
-      title: 'Health Tracker',
+      title: t('healthTracker', 'Health Tracker'),
       icon: Activity,
       screen: 'health-tracker',
       color: 'bg-amber-50 text-amber-700',
@@ -161,12 +161,14 @@ export const HomeScreen: React.FC = () => {
           <div className="flex items-center justify-between mb-2.5">
             <div>
               <h3 className="font-extrabold text-sm text-[#172B4D] tracking-tight">
-                Healthcare Services
+                {t('healthcareServices', 'Healthcare Services')}
               </h3>
-              <p className="text-[11px] text-slate-400">Everything you need for total wellness</p>
+              <p className="text-[11px] text-slate-400">
+                {t('everythingYouNeed', 'Everything you need for total wellness')}
+              </p>
             </div>
             <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
-              Verified Healthcare
+              {t('verifiedHealthcare', 'Verified Healthcare')}
             </span>
           </div>
 
@@ -231,14 +233,18 @@ export const HomeScreen: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h3 className="font-extrabold text-sm text-[#172B4D]">Hospitals in {currentCity}</h3>
-              <p className="text-[11px] text-slate-400">Verified multi-speciality centers</p>
+              <h3 className="font-extrabold text-sm text-[#172B4D]">
+                {t('hospitalsIn', 'Hospitals in')} {currentCity}
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {t('verifiedMultiSpeciality', 'Verified multi-speciality centers')}
+              </p>
             </div>
             <button
               onClick={() => navigateTo('book-appointment')}
               className="text-xs font-bold text-[#087E8B] hover:underline flex items-center gap-0.5"
             >
-              <span>See All</span>
+              <span>{t('seeAll', 'See All')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -258,7 +264,7 @@ export const HomeScreen: React.FC = () => {
                   />
                   <div className="absolute top-2 left-2 bg-[#172B4D]/85 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                     <MapPin className="w-3 h-3 text-emerald-400" />
-                    <span>{hosp.calculatedDistanceStr} away</span>
+                    <span>{hosp.calculatedDistanceStr} {t('away', 'away')}</span>
                   </div>
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-xs text-slate-800 text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5 shadow-2xs">
                     <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
@@ -273,7 +279,7 @@ export const HomeScreen: React.FC = () => {
                     </span>
                     {hosp.verified && (
                       <span className="text-[9px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.2 rounded flex items-center gap-0.5">
-                        <ShieldCheck className="w-2.5 h-2.5" /> Verified
+                        <ShieldCheck className="w-2.5 h-2.5" /> {t('verified', 'Verified')}
                       </span>
                     )}
                   </div>
@@ -284,7 +290,7 @@ export const HomeScreen: React.FC = () => {
 
                   <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
                     <span className="text-slate-500">
-                      <strong className="text-teal-700">{hosp.bedsAvailable}</strong> Beds
+                      <strong className="text-teal-700">{hosp.bedsAvailable}</strong> {t('beds', 'Beds')}
                     </span>
                     <div className="flex items-center gap-1">
                       <button
@@ -303,9 +309,9 @@ export const HomeScreen: React.FC = () => {
                         className="text-[10px] font-black text-amber-800 bg-amber-50 hover:bg-amber-100 px-1.5 py-0.5 rounded-lg border border-amber-300 flex items-center gap-0.5 transition-colors"
                         title="View live road route"
                       >
-                        Route 📍
+                        {t('route', 'Route')} 📍
                       </button>
-                      <span className="font-bold text-[#087E8B]">OPD →</span>
+                      <span className="font-bold text-[#087E8B]">{t('opd', 'OPD')} →</span>
                     </div>
                   </div>
                 </div>
@@ -318,14 +324,18 @@ export const HomeScreen: React.FC = () => {
         <div>
           <div className="flex items-center justify-between mb-2">
             <div>
-              <h3 className="font-extrabold text-sm text-[#172B4D]">Popular Diagnostic Tests</h3>
-              <p className="text-[11px] text-slate-400">Certified NABL accredited labs</p>
+              <h3 className="font-extrabold text-sm text-[#172B4D]">
+                {t('popularDiagnosticTests', 'Popular Diagnostic Tests')}
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                {t('certifiedNablLabs', 'Certified NABL accredited labs')}
+              </p>
             </div>
             <button
-              onClick={() => navigateTo('medical-checkup')}
+              onClick={() => navigateTo('all-checkups')}
               className="text-xs font-bold text-[#087E8B] hover:underline"
             >
-              All Tests
+              {t('allTests', 'All Tests')}
             </button>
           </div>
 
@@ -333,7 +343,7 @@ export const HomeScreen: React.FC = () => {
             {DIAGNOSTIC_TESTS.slice(0, 4).map((test) => (
               <div
                 key={test.id}
-                onClick={() => navigateTo('medical-checkup', { selectedTestId: test.id })}
+                onClick={() => navigateTo('all-checkups', { selectedTestId: test.id })}
                 className="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
@@ -349,7 +359,7 @@ export const HomeScreen: React.FC = () => {
                 <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
                   <span className="text-xs font-extrabold text-[#172B4D]">₹{test.price}</span>
                   <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg">
-                    Book
+                    {t('book', 'Book')}
                   </span>
                 </div>
               </div>
@@ -361,19 +371,19 @@ export const HomeScreen: React.FC = () => {
         <div className="bg-gradient-to-r from-teal-800 to-[#172B4D] rounded-2xl p-4 text-white shadow-sm">
           <div className="flex items-center gap-1.5 text-teal-300 text-[10px] font-bold uppercase tracking-wider mb-1">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Doctor G Health Insight</span>
+            <span>{t('doctorGHealthInsight', 'Doctor G Health Insight')}</span>
           </div>
           <h4 className="font-bold text-xs text-white mb-1">
-            Hydration & Blood Pressure In Seasonal Weather
+            {t('hydrationInsightTitle', 'Hydration & Blood Pressure In Seasonal Weather')}
           </h4>
           <p className="text-[11px] text-slate-300 leading-relaxed mb-3">
-            Ensure at least 2.5 liters of clean water daily. Avoid excess caffeine if your systolic blood pressure tends to cross 130 mmHg.
+            {t('hydrationInsightDesc', 'Ensure at least 2.5 liters of clean water daily. Avoid excess caffeine if your systolic blood pressure tends to cross 130 mmHg.')}
           </p>
           <button
             onClick={() => navigateTo('health-tracker')}
             className="text-xs font-bold text-teal-300 hover:text-white flex items-center gap-1"
           >
-            <span>Log Today's Water & Vitals</span>
+            <span>{t('logTodayWater', "Log Today's Water & Vitals")}</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -381,7 +391,7 @@ export const HomeScreen: React.FC = () => {
         {/* Realistic Demo Data Disclaimer Badge */}
         <div className="p-3 bg-slate-100 rounded-xl text-center border border-slate-200/60">
           <p className="text-[10px] text-slate-500 leading-tight">
-            <strong>Demonstration Healthcare Environment:</strong> Doctor names, hospitals, ratings & blood availability are simulated for interface evaluation. For active medical emergencies, immediately dial <strong>108</strong> or <strong>112</strong>.
+            {t('demoDisclaimer')}
           </p>
         </div>
       </div>

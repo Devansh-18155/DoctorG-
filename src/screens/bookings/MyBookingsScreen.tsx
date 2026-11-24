@@ -14,7 +14,7 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 export const MyBookingsScreen: React.FC = () => {
-  const { appointments, navigateTo } = useApp();
+  const { appointments, navigateTo, t } = useApp();
   const [activeTab, setActiveTab] = useState<'UPCOMING' | 'COMPLETED' | 'CANCELLED'>('UPCOMING');
   const [search, setSearch] = useState('');
 
@@ -34,16 +34,16 @@ export const MyBookingsScreen: React.FC = () => {
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-lg font-extrabold text-[#172B4D] tracking-tight">
-              My Appointments
+              {t('myAppointments', 'My Appointments')}
             </h1>
-            <p className="text-xs text-slate-500">Track consultation slips & live patient queue</p>
+            <p className="text-xs text-slate-500">{t('trackConsultationSlips', 'Track consultation slips & live patient queue')}</p>
           </div>
           <button
             onClick={() => navigateTo('book-appointment')}
             className="flex items-center gap-1 bg-[#087E8B] hover:bg-[#06626D] text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-colors"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Book New</span>
+            <span>{t('bookNew', 'Book New')}</span>
           </button>
         </div>
 
@@ -54,7 +54,7 @@ export const MyBookingsScreen: React.FC = () => {
             onChange={(e) => setSearch(e.target.value)}
             onChangeValue={setSearch}
             onClear={() => setSearch('')}
-            placeholder="Search by doctor, hospital or ID..."
+            placeholder={t('searchDoctorHospital', 'Search by doctor, hospital or ID...')}
             searchCategory="doctor"
           />
         </div>
@@ -63,6 +63,13 @@ export const MyBookingsScreen: React.FC = () => {
         <div className="flex p-1 bg-slate-100 rounded-xl">
           {(['UPCOMING', 'COMPLETED', 'CANCELLED'] as const).map((tab) => {
             const count = appointments.filter((a) => a.bookingStatus === tab).length;
+            const tabLabel =
+              tab === 'UPCOMING'
+                ? t('upcoming', 'Upcoming')
+                : tab === 'COMPLETED'
+                ? t('completed', 'Completed')
+                : t('cancelled', 'Cancelled');
+
             return (
               <button
                 key={tab}
@@ -73,13 +80,7 @@ export const MyBookingsScreen: React.FC = () => {
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                <span>
-                  {tab === 'UPCOMING'
-                    ? 'Upcoming'
-                    : tab === 'COMPLETED'
-                    ? 'Completed'
-                    : 'Cancelled'}
-                </span>
+                <span>{tabLabel}</span>
                 <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded-full font-semibold">
                   {count}
                 </span>
@@ -94,13 +95,19 @@ export const MyBookingsScreen: React.FC = () => {
         {filteredAppointments.length === 0 ? (
           <EmptyState
             icon={CalendarCheck}
-            title={`No ${activeTab.toLowerCase()} appointments`}
+            title={
+              activeTab === 'UPCOMING'
+                ? t('noUpcomingAppointments', 'No upcoming appointments')
+                : activeTab === 'COMPLETED'
+                ? t('noCompletedAppointments', 'No completed appointments')
+                : t('noCancelledAppointments', 'No cancelled appointments')
+            }
             description={
               activeTab === 'UPCOMING'
-                ? "You don't have any upcoming doctor appointments scheduled."
-                : `No ${activeTab.toLowerCase()} appointment records found.`
+                ? t('noUpcomingAptDesc', "You don't have any upcoming doctor appointments scheduled.")
+                : t('noAptRecordFound', `No ${activeTab.toLowerCase()} appointment records found.`)
             }
-            actionLabel="Book An Appointment"
+            actionLabel={t('bookAppointment', 'Book An Appointment')}
             onAction={() => navigateTo('book-appointment')}
           />
         ) : (
@@ -114,7 +121,7 @@ export const MyBookingsScreen: React.FC = () => {
               <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <span className="bg-teal-50 text-teal-800 font-extrabold text-xs px-2.5 py-0.5 rounded-lg border border-teal-200/60">
-                    Patient No: #{String(apt.patientNumber || apt.tokenNumber).padStart(3, '0')}
+                    {t('patientNumber', 'Patient No')}: #{String(apt.patientNumber || apt.tokenNumber).padStart(3, '0')}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono font-medium">
                     {apt.bookingId}
@@ -162,16 +169,16 @@ export const MyBookingsScreen: React.FC = () => {
                     className="flex items-center gap-1 text-[11px] font-bold text-teal-700 hover:text-teal-800"
                   >
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Live Queue: Patient #{String(apt.currentToken || 19).padStart(3, '0')} (Wait ~{apt.estimatedWaitMinutes}m)</span>
+                    <span>{t('currentQueueToken', 'Live Queue')}: Patient #{String(apt.currentToken || 19).padStart(3, '0')} (~{apt.estimatedWaitMinutes}m)</span>
                   </button>
                 ) : (
                   <span className="text-[10px] text-slate-400">
-                    Patient: {apt.patientName}
+                    {t('patientName', 'Patient')}: {apt.patientName}
                   </span>
                 )}
 
                 <span className="font-bold text-[#087E8B] text-xs flex items-center gap-0.5">
-                  View Slip <ChevronRight className="w-3.5 h-3.5" />
+                  {t('viewSlip', 'View Slip')} <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, Mic, MicOff, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { SPEECH_LANG_MAP } from '../../translations';
 
 export interface VoiceSearchInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
@@ -51,10 +52,10 @@ export const VoiceSearchInput: React.FC<VoiceSearchInputProps> = ({
     typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
-  // Determine speech recognition language (Hindi / Indian English)
+  // Determine speech recognition language based on selected global language
   const getRecognitionLanguage = () => {
     if (language !== 'auto') return language;
-    return currentLanguage === 'hi' ? 'hi-IN' : 'en-IN';
+    return SPEECH_LANG_MAP[currentLanguage] || 'en-IN';
   };
 
   // Stop listening on unmount
