@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { MEDICINE_PRODUCTS } from '../../data/mockData';
 import { MedicineProduct, CartItem, MedicineOrder } from '../../types';
+import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 export const MedicalStoreScreen: React.FC = () => {
   const {
@@ -154,17 +155,15 @@ export const MedicalStoreScreen: React.FC = () => {
             ======================================================== */}
         {viewMode === 'store' && (
           <div className="space-y-4 animate-in fade-in">
-            {/* Search Bar */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search medicines, salts, health devices..."
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-medium"
-              />
-            </div>
+            {/* Search Bar with Reusable Voice Search */}
+            <VoiceSearchInput
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onChangeValue={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              placeholder="Search medicines, salts, health devices..."
+              searchCategory="medicine"
+            />
 
             {/* Quick Upload Prescription Banner */}
             <div className="bg-gradient-to-r from-teal-800 to-[#087E8B] p-4 rounded-2xl text-white shadow-sm flex items-center justify-between gap-3">

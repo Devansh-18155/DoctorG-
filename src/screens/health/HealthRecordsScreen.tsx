@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { HealthRecord } from '../../types';
+import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 export const HealthRecordsScreen: React.FC = () => {
   const {
@@ -110,17 +111,15 @@ export const HealthRecordsScreen: React.FC = () => {
       </div>
 
       <div className="p-4 space-y-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search records by title, doctor or hospital..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-medium"
-          />
-        </div>
+        {/* Search with Reusable Voice Search */}
+        <VoiceSearchInput
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onChangeValue={setSearch}
+          onClear={() => setSearch('')}
+          placeholder="Search records by title, doctor or hospital..."
+          searchCategory="general"
+        />
 
         {/* Categories horizontal scroll */}
         <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">

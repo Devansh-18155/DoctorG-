@@ -1,103 +1,121 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { Globe, ArrowRight, ShieldCheck, Heart, User, Sparkles } from 'lucide-react';
-import { LanguageModal } from '../../components/common/LanguageModal';
-import { SUPPORTED_LANGUAGES } from '../../translations';
+import { Clock, ShieldCheck } from 'lucide-react';
+import { AshokaChakraBackground } from '../../components/welcome/AshokaChakraBackground';
+import {
+  TricolourTopDecoration,
+  TricolourBottomDecoration,
+} from '../../components/welcome/TricolourBorderDecoration';
+import { DoctorGLogo } from '../../components/welcome/DoctorGLogo';
+import { RoleSelectionCard } from '../../components/welcome/RoleSelectionCard';
 
 export const WelcomeScreen: React.FC = () => {
-  const { navigateTo, loginAsPatient, currentLanguage, t } = useApp();
-  const [isLangOpen, setIsLangOpen] = useState(false);
+  const { navigateTo, setCurrentRole, loginAsDoctor, showToast } = useApp();
 
-  const activeLang = SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage);
+  const handleSelectPatient = () => {
+    setCurrentRole('patient');
+    showToast('Continuing as Patient', 'info');
+    navigateTo('login');
+  };
+
+  const handleSelectDoctor = () => {
+    navigateTo('doctor-services');
+  };
 
   return (
-    <div className="min-h-[580px] h-full flex flex-col justify-between p-6 bg-gradient-to-b from-white via-[#F6F8FA] to-[#EAF7F6]/40">
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#087E8B] to-[#172B4D] flex items-center justify-center text-white font-extrabold text-sm">
-            G+
+    <div className="min-h-screen w-full bg-slate-50 flex items-center justify-center p-0 sm:p-4 select-none">
+      {/* Mobile Card Container matching the reference image */}
+      <div className="relative w-full max-w-[430px] min-h-screen sm:min-h-[700px] sm:max-h-[880px] bg-white sm:rounded-[36px] sm:shadow-2xl sm:border border-slate-100 flex flex-col justify-between overflow-hidden">
+        
+        {/* ========================================================
+            TOP: INDIAN TRICOLOUR DECORATIVE WAVE
+            ======================================================== */}
+        <TricolourTopDecoration className="w-full flex-shrink-0" />
+
+        {/* ========================================================
+            CENTER CONTENT AREA
+            ======================================================== */}
+        <div className="flex-1 flex flex-col justify-between px-6 py-2 sm:px-7">
+          
+          {/* BRANDING SECTION: CHAKRA WATERMARK + LOGO + 24x7 BADGE */}
+          <div className="relative flex flex-col items-center pt-2 sm:pt-4">
+            {/* Ashoka Chakra Background Watermark */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+              <AshokaChakraBackground size={235} opacity={0.08} />
+            </div>
+
+            {/* Doctor G Logo Stack */}
+            <div className="relative z-10 my-2">
+              <DoctorGLogo />
+            </div>
+
+            {/* 24×7 MEDICAL CARE Capsule Badge */}
+            <div className="relative z-10 mt-3 sm:mt-4">
+              <div className="inline-flex items-center gap-2 bg-[#C5161D] text-white px-4 py-1.5 rounded-full shadow-sm hover:shadow-md transition-shadow">
+                {/* White Clock Icon */}
+                <div className="w-4 h-4 rounded-full border-1.5 border-white flex items-center justify-center">
+                  <Clock className="w-3 h-3 text-white stroke-[2.5]" />
+                </div>
+
+                {/* Bold 24×7 */}
+                <span className="font-black text-sm tracking-tight leading-none">
+                  24×7
+                </span>
+
+                {/* Divider */}
+                <span className="text-white/60 font-light text-xs">|</span>
+
+                {/* MEDICAL CARE */}
+                <span className="font-extrabold text-[11px] tracking-wider uppercase leading-none">
+                  MEDICAL CARE
+                </span>
+              </div>
+            </div>
           </div>
-          <span className="font-bold text-sm text-[#172B4D]">Doctor G</span>
-        </div>
 
-        {/* Language Pill */}
-        <button
-          onClick={() => setIsLangOpen(true)}
-          className="flex items-center gap-1.5 bg-white border border-slate-200/80 px-2.5 py-1 rounded-full text-xs font-semibold text-slate-700 shadow-2xs hover:border-teal-500 transition-colors"
-        >
-          <Globe className="w-3.5 h-3.5 text-[#087E8B]" />
-          <span>{activeLang?.nativeName || 'English'}</span>
-        </button>
-      </div>
+          {/* ========================================================
+              ROLE SELECTION SECTION: "Continue as" + Patient & Doctor Cards
+              ======================================================== */}
+          <div className="w-full my-auto py-5 space-y-3.5 sm:space-y-4">
+            {/* Header Row: "Continue as" + "Select your profile" */}
+            <div className="flex items-baseline justify-between px-1">
+              <h2 className="text-xl sm:text-[22px] font-black text-[#102B55] tracking-tight">
+                Continue as
+              </h2>
+              <span className="text-xs font-semibold text-slate-500">
+                Select your profile
+              </span>
+            </div>
 
-      {/* Main Illustration & Intro */}
-      <div className="my-auto py-6 flex flex-col items-center text-center">
-        {/* Doctor Graphic */}
-        <div className="relative mb-6">
-          <div className="w-48 h-48 rounded-full bg-gradient-to-tr from-teal-100 to-sky-50 border-4 border-white shadow-xl flex items-center justify-center overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=500&q=80"
-              alt="Caring Doctor"
-              className="w-full h-full object-cover object-top"
+            {/* Patient Card */}
+            <RoleSelectionCard
+              role="patient"
+              onClick={handleSelectPatient}
+            />
+
+            {/* Doctor Card */}
+            <RoleSelectionCard
+              role="doctor"
+              onClick={handleSelectDoctor}
             />
           </div>
-          <div className="absolute bottom-2 right-2 bg-white px-3 py-1 rounded-full shadow-md border border-slate-100 flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span className="text-[11px] font-bold text-slate-700">Verified Doctors</span>
+
+          {/* ========================================================
+              FOOTER: TRUST VERIFICATION LINE
+              ======================================================== */}
+          <div className="w-full pb-2 pt-1 flex items-center justify-center gap-1.5 text-center">
+            <ShieldCheck className="w-4 h-4 text-[#24B34B] flex-shrink-0" />
+            <span className="text-xs font-bold text-[#102B55] tracking-tight">
+              NMC Verified Doctors • Encrypted & Private
+            </span>
           </div>
         </div>
 
-        {/* Headlines */}
-        <h2 className="text-2xl font-extrabold text-[#172B4D] tracking-tight mb-2">
-          Healthcare That Cares For You
-        </h2>
-        <p className="text-xs text-slate-500 max-w-[280px] leading-relaxed mb-4">
-          Book trusted doctors, request urgent ambulances, order doorstep medicines, and monitor live clinic queues.
-        </p>
-
-        {/* Highlights */}
-        <div className="flex items-center gap-4 text-[11px] font-medium text-slate-600 bg-white/80 backdrop-blur-xs py-2 px-4 rounded-xl border border-slate-100 shadow-2xs">
-          <span className="flex items-center gap-1">
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> 24/7 Care
-          </span>
-          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-          <span>Zero Extra Fees</span>
-          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-          <span>Live Patient Queue</span>
-        </div>
+        {/* ========================================================
+            BOTTOM: INDIAN TRICOLOUR DECORATIVE WAVE
+            ======================================================== */}
+        <TricolourBottomDecoration className="w-full flex-shrink-0" />
       </div>
-
-      {/* Action Buttons */}
-      <div className="space-y-2.5">
-        {/* Get Started -> Registration */}
-        <button
-          onClick={() => navigateTo('register')}
-          className="w-full flex items-center justify-center gap-2 bg-[#087E8B] hover:bg-[#06626D] text-white py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md shadow-teal-700/25 transition-all group"
-        >
-          <span>{t('getStarted') || 'Get Started'}</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-        </button>
-
-        {/* Sign In -> Login */}
-        <button
-          onClick={() => navigateTo('login')}
-          className="w-full flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-[#172B4D] border border-slate-200 py-3 px-4 rounded-2xl font-bold text-sm shadow-2xs transition-all"
-        >
-          <User className="w-4 h-4 text-[#087E8B]" />
-          <span>{t('signIn') || 'Sign In to Existing Account'}</span>
-        </button>
-
-        {/* Skip for Now -> Guest Mode */}
-        <button
-          onClick={() => loginAsPatient(true)}
-          className="w-full py-2 text-center text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors"
-        >
-          {t('skipForNow') || 'Skip for Now (Browse as Guest)'}
-        </button>
-      </div>
-
-      <LanguageModal isOpen={isLangOpen} onClose={() => setIsLangOpen(false)} />
     </div>
   );
 };

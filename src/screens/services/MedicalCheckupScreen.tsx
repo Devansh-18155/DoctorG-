@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { DIAGNOSTIC_TESTS } from '../../data/mockData';
 import { DiagnosticTest, TestBooking } from '../../types';
+import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 export const MedicalCheckupScreen: React.FC = () => {
   const {
@@ -119,17 +120,15 @@ export const MedicalCheckupScreen: React.FC = () => {
             ======================================================== */}
         {activeTab === 'tests' && (
           <div className="space-y-4 animate-in fade-in">
-            {/* Search */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search diagnostic blood, urine or imaging tests..."
-                className="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-medium"
-              />
-            </div>
+            {/* Search Bar with Reusable Voice Search */}
+            <VoiceSearchInput
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onChangeValue={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              placeholder="Search diagnostic blood, urine or imaging tests..."
+              searchCategory="test"
+            />
 
             {/* Category horizontal scroll */}
             <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">

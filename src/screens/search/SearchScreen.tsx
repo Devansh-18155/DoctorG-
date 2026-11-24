@@ -25,6 +25,8 @@ import {
   FileText,
   Activity,
   Users,
+  Compass,
+  MapPin,
 } from 'lucide-react';
 import {
   HOSPITALS,
@@ -37,8 +39,18 @@ import {
   TRADITIONAL_PRACTITIONERS,
 } from '../../data/mockData';
 import { VoiceSearchModal } from '../../components/common/VoiceSearchModal';
+import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 const APP_SERVICES_DATA = [
+  {
+    id: 'svc-find-doctor',
+    name: 'Find Doctors & Clinic Map',
+    keywords: ['find doctor', 'map', 'directions', 'locate clinic', 'specialist', 'navigation', 'city search', 'gis', 'doctor'],
+    screen: 'find-doctor',
+    icon: Compass,
+    color: 'bg-teal-50 text-teal-800',
+    desc: 'City-based doctor discovery with interactive maps, turn-by-turn routes & Google Maps navigation',
+  },
   {
     id: 'svc-appointment',
     name: 'Book Doctor Appointment',
@@ -83,15 +95,6 @@ const APP_SERVICES_DATA = [
     icon: PackagePlus,
     color: 'bg-purple-50 text-purple-700',
     desc: 'Curated preventive packages with doctor consultation',
-  },
-  {
-    id: 'svc-consult',
-    name: 'Online Video Consultation',
-    keywords: ['online', 'video', 'call', 'consultation', 'chat doctor', 'telehealth'],
-    screen: 'online-consultation',
-    icon: Video,
-    color: 'bg-indigo-50 text-indigo-700',
-    desc: 'Connect with verified specialists in 10 minutes from home',
   },
   {
     id: 'svc-blood',
@@ -177,7 +180,7 @@ export const SearchScreen: React.FC = () => {
     'Blood Group B+',
     'ICU Ambulance',
     'Ayurvedic Doctor',
-    'Online Consultation',
+    'Cardiologist',
   ];
 
   // Auto-handle initialQuery changes if passed from outside
@@ -341,43 +344,26 @@ export const SearchScreen: React.FC = () => {
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          <div className="flex-1 relative flex items-center">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3" />
-            <input
-              type="text"
+          <div className="flex-1">
+            <VoiceSearchInput
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  addSearchHistory(query);
+              onChangeValue={(val) => {
+                setQuery(val);
+                if (val.trim()) {
+                  addSearchHistory(val);
                 }
               }}
+              onSearch={(val) => {
+                if (val.trim()) {
+                  addSearchHistory(val);
+                }
+              }}
+              onClear={() => setQuery('')}
               placeholder="Search doctors, medicines, tests, ambulance..."
-              className="w-full pl-9 pr-18 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 font-medium"
+              searchCategory="general"
             />
-
-            <div className="absolute right-2 flex items-center gap-1">
-              {query && (
-                <button
-                  onClick={() => setQuery('')}
-                  className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-200"
-                  title="Clear text"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-
-              {/* Voice Search Mic Button inside input bar */}
-              <button
-                type="button"
-                onClick={() => setIsVoiceModalOpen(true)}
-                className="p-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#087E8B] hover:scale-105 active:scale-95 transition-all shadow-2xs"
-                title="Search with Voice"
-              >
-                <Mic className="w-4 h-4 text-[#087E8B]" />
-              </button>
-            </div>
           </div>
         </div>
 
@@ -571,6 +557,34 @@ export const SearchScreen: React.FC = () => {
         {/* If query has results */}
         {results && (
           <div>
+            {/* Direct Location Discovery Banner if search query exists */}
+            <div
+              onClick={() => navigateTo('find-doctor')}
+              className="mb-4 p-3.5 bg-gradient-to-r from-[#087E8B] via-[#0D4B55] to-[#172B4D] text-white rounded-2xl shadow-sm cursor-pointer hover:shadow-md transition-all flex items-center justify-between group border border-teal-600/40"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs border border-white/20 flex items-center justify-center text-teal-200 flex-shrink-0 group-hover:scale-105 transition-transform">
+                  <Compass className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5 text-teal-200 text-[10px] font-bold uppercase tracking-wider">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>India-Wide Healthcare Discovery</span>
+                  </div>
+                  <h4 className="font-extrabold text-xs text-white mt-0.5">
+                    Search Doctors & Hospitals for "{query}"
+                  </h4>
+                  <p className="text-[11px] text-teal-100/80">
+                    Interactive map • Radius discovery • Google Maps navigation
+                  </p>
+                </div>
+              </div>
+              <button className="px-3 py-1.5 bg-white text-teal-900 font-extrabold text-xs rounded-xl shadow-xs flex items-center gap-1 flex-shrink-0 hover:bg-teal-50 transition-colors">
+                <span>Search</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
             {results.totalCount === 0 ? (
               <div className="text-center py-12">
                 <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3 text-slate-400">

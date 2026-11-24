@@ -263,3 +263,38 @@ export function getNearbyDoctors(
 
   return mapped;
 }
+
+/**
+ * Formats locality, city, and state cleanly without duplicate repetitions
+ * e.g., if area is "Chhatarpur" and city is "Chhatarpur", returns "Chhatarpur" (or "Chhatarpur, Madhya Pradesh")
+ * instead of "Chhatarpur, Chhatarpur".
+ */
+export function formatLocationName(
+  area?: string | null,
+  city?: string | null,
+  state?: string | null
+): string {
+  const a = (area || '').trim();
+  const c = (city || '').trim();
+  const s = (state || '').trim();
+
+  if (!a && !c) return s || '';
+  if (!a) return s && s.toLowerCase() !== c.toLowerCase() ? `${c}, ${s}` : c;
+  if (!c) return s && s.toLowerCase() !== a.toLowerCase() ? `${a}, ${s}` : a;
+
+  const aLower = a.toLowerCase();
+  const cLower = c.toLowerCase();
+
+  // If area and city are the same string (e.g. "Chhatarpur" and "Chhatarpur")
+  if (aLower === cLower) {
+    return s && s.toLowerCase() !== cLower ? `${c}, ${s}` : c;
+  }
+
+  // If area already contains city (e.g. "Kolar Road, Bhopal" and "Bhopal")
+  if (aLower.includes(cLower)) {
+    return a;
+  }
+
+  return `${a}, ${c}`;
+}
+

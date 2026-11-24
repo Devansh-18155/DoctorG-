@@ -21,6 +21,8 @@ import {
   HospitalWithDistance,
   DoctorWithDistance,
 } from '../../utils/locationHelper';
+import { TravelTimeCardSection } from '../navigation/TravelTimeCardSection';
+import { LiveRouteNavigationModal, NavigationTarget } from '../navigation/LiveRouteNavigationModal';
 
 interface NearbyCareExplorerProps {
   onOpenLocationModal: () => void;
@@ -34,6 +36,7 @@ export const NearbyCareExplorer: React.FC<NearbyCareExplorerProps> = ({
   const [activeTab, setActiveTab] = useState<'hospitals' | 'doctors' | 'radar'>('hospitals');
   const [selectedRadius, setSelectedRadius] = useState<number>(15); // in km
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
+  const [navTarget, setNavTarget] = useState<NavigationTarget | null>(null);
 
   // Dynamically calculate nearby hospitals based on chosen location
   const nearbyHospitals = useMemo(() => {
@@ -230,6 +233,23 @@ export const NearbyCareExplorer: React.FC<NearbyCareExplorerProps> = ({
                   </div>
                 </div>
 
+                {/* Compact Distance, Travel Times (Car, Bike, Walk) & View Route */}
+                <div className="pt-1">
+                  <TravelTimeCardSection
+                    distanceKm={hosp.calculatedDistanceKm}
+                    onViewRoute={() =>
+                      setNavTarget({
+                        id: hosp.id,
+                        name: hosp.name,
+                        area: hosp.area,
+                        city: hosp.city,
+                        address: hosp.address,
+                        type: hosp.type,
+                      })
+                    }
+                  />
+                </div>
+
                 {/* Available Departments Tags */}
                 <div className="flex items-center gap-1 overflow-x-auto pt-1 border-t border-slate-100 scrollbar-none">
                   {hosp.departments.slice(0, 3).map((dept) => (
@@ -281,65 +301,83 @@ export const NearbyCareExplorer: React.FC<NearbyCareExplorerProps> = ({
               <div
                 key={doc.id}
                 onClick={() => navigateTo('book-appointment', { selectedDoctorId: doc.id, step: 6 })}
-                className="p-3 bg-white hover:bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs hover:shadow-xs transition-all cursor-pointer group flex items-start justify-between gap-3"
+                className="p-3 bg-white hover:bg-slate-50/70 border border-slate-200/80 rounded-2xl shadow-2xs hover:shadow-xs transition-all cursor-pointer group space-y-2"
               >
-                <div className="flex items-start gap-3">
-                  <img
-                    src={doc.imageUrl}
-                    alt={doc.name}
-                    className="w-13 h-13 rounded-xl object-cover border border-slate-200 flex-shrink-0 group-hover:scale-105 transition-transform"
-                  />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <h4 className="font-bold text-xs text-[#172B4D] group-hover:text-[#087E8B] transition-colors leading-snug">
-                        {doc.name}
-                      </h4>
-                      {doc.verified && (
-                        <span className="text-[9px] font-black bg-emerald-50 text-emerald-700 px-1.5 py-0.2 rounded">
-                          Verified
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={doc.imageUrl}
+                      alt={doc.name}
+                      className="w-13 h-13 rounded-xl object-cover border border-slate-200 flex-shrink-0 group-hover:scale-105 transition-transform"
+                    />
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-xs text-[#172B4D] group-hover:text-[#087E8B] transition-colors leading-snug">
+                          {doc.name}
+                        </h4>
+                        {doc.verified && (
+                          <span className="text-[9px] font-black bg-emerald-50 text-emerald-700 px-1.5 py-0.2 rounded">
+                            Verified
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-teal-700 font-semibold">{doc.specialty}</p>
+
+                      {/* Hospital & Distance Badge */}
+                      <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">
+                        🏥 {doc.hospitalName} ({doc.hospitalArea})
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1 ${
+                            doc.isImmediate
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : doc.isNearby
+                              ? 'bg-teal-100 text-teal-800'
+                              : 'bg-slate-100 text-slate-700'
+                          }`}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span>{doc.calculatedDistanceStr} away</span>
                         </span>
-                      )}
+                        <span className="text-[10px] text-slate-400">
+                          {doc.experienceYears} yrs exp
+                        </span>
+                        <span className="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
+                          <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+                          <span>{doc.rating}</span>
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-teal-700 font-semibold">{doc.specialty}</p>
+                  </div>
 
-                    {/* Hospital & Distance Badge */}
-                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">
-                      🏥 {doc.hospitalName} ({doc.hospitalArea})
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs font-black text-[#172B4D]">₹{doc.consultationFee}</p>
+                    <p className="text-[9px] text-emerald-700 font-semibold mt-0.5">
+                      {doc.nextSlot ? doc.nextSlot.split(',')[0] : 'Available'}
                     </p>
-
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-full flex items-center gap-1 ${
-                          doc.isImmediate
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : doc.isNearby
-                            ? 'bg-teal-100 text-teal-800'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>{doc.calculatedDistanceStr} away</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400">
-                        {doc.experienceYears} yrs exp
-                      </span>
-                      <span className="text-[10px] font-bold text-amber-600 flex items-center gap-0.5">
-                        <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
-                        <span>{doc.rating}</span>
-                      </span>
-                    </div>
+                    <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg mt-1 inline-block group-hover:bg-[#087E8B] group-hover:text-white transition-all">
+                      Book
+                    </span>
                   </div>
                 </div>
 
-                <div className="text-right flex-shrink-0">
-                  <p className="text-xs font-black text-[#172B4D]">₹{doc.consultationFee}</p>
-                  <p className="text-[9px] text-emerald-700 font-semibold mt-0.5">
-                    {doc.nextSlot ? doc.nextSlot.split(',')[0] : 'Available'}
-                  </p>
-                  <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg mt-1 inline-block group-hover:bg-[#087E8B] group-hover:text-white transition-all">
-                    Book
-                  </span>
-                </div>
+                {/* Compact Distance, Multi-Modal Travel Times & View Route */}
+                <TravelTimeCardSection
+                  distanceKm={doc.calculatedDistanceKm}
+                  onViewRoute={() =>
+                    setNavTarget({
+                      id: doc.id,
+                      name: doc.name,
+                      specialty: doc.specialty,
+                      hospitalName: doc.hospitalName,
+                      area: doc.hospitalArea,
+                      city: doc.hospitalCity,
+                      type: 'doctor',
+                    })
+                  }
+                />
               </div>
             ))
           )}
@@ -457,8 +495,24 @@ export const NearbyCareExplorer: React.FC<NearbyCareExplorerProps> = ({
               </button>
             </div>
           )}
+
+          <button
+            onClick={() => navigateTo('find-doctor')}
+            className="w-full py-2.5 bg-[#087E8B] hover:bg-[#06626D] text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+          >
+            <Compass className="w-4 h-4 text-teal-200" />
+            <span>Launch City GIS Doctor & Clinic Map View</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
+
+      {/* Interactive Map & Live GPS Route Navigation Modal */}
+      <LiveRouteNavigationModal
+        isOpen={Boolean(navTarget)}
+        onClose={() => setNavTarget(null)}
+        target={navTarget}
+      />
     </div>
   );
 };

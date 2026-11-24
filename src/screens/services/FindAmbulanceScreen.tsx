@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { AMBULANCE_SERVICES, HOSPITALS } from '../../data/mockData';
 import { AmbulanceService } from '../../types';
+import { formatLocationName } from '../../utils/locationHelper';
 
 export const FindAmbulanceScreen: React.FC = () => {
   const {
@@ -36,7 +37,7 @@ export const FindAmbulanceScreen: React.FC = () => {
   const [page, setPage] = useState<1 | 2 | 3 | 4>(activeAmbulanceBooking ? 4 : 1);
 
   // Form data
-  const [pickupAddress, setPickupAddress] = useState(`${currentArea}, ${currentCity}`);
+  const [pickupAddress, setPickupAddress] = useState(formatLocationName(currentArea, currentCity));
   const [destinationHospital, setDestinationHospital] = useState(HOSPITALS[0].name);
   const [patientName, setPatientName] = useState(user?.name || 'Subhasis Gupta');
   const [emergencyPhone, setEmergencyPhone] = useState(user?.phone || '+91 98301 54321');

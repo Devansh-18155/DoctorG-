@@ -39,6 +39,9 @@ import { PaymentHistoryScreen } from './screens/profile/PaymentHistoryScreen';
 import { ReviewsScreen } from './screens/profile/ReviewsScreen';
 import { HelpSupportScreen } from './screens/profile/HelpSupportScreen';
 import { EmergencyScreen } from './screens/emergency/EmergencyScreen';
+import { FindDoctorScreen } from './screens/doctor/FindDoctorScreen';
+import { DoctorDirectionsScreen } from './screens/doctor/DoctorDirectionsScreen';
+import { DoctorServicesScreen } from './screens/doctor/DoctorServicesScreen';
 
 // Dashboards
 import { DoctorDashboard } from './screens/doctor/DoctorDashboard';
@@ -91,6 +94,8 @@ export const App: React.FC = () => {
         return <SplashScreen />;
       case 'welcome':
         return <WelcomeScreen />;
+      case 'doctor-services':
+        return <DoctorServicesScreen />;
       case 'login':
         return <LoginScreen />;
       case 'register':
@@ -153,6 +158,10 @@ export const App: React.FC = () => {
         return <HelpSupportScreen />;
       case 'emergency':
         return <EmergencyScreen />;
+      case 'find-doctor':
+        return <FindDoctorScreen />;
+      case 'doctor-directions':
+        return <DoctorDirectionsScreen />;
       default:
         return <HomeScreen />;
     }

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { StatusBadge } from '../../components/common/StatusBadge';
 import { EmptyState } from '../../components/common/EmptyState';
+import { VoiceSearchInput } from '../../components/common/VoiceSearchInput';
 
 export const MyBookingsScreen: React.FC = () => {
   const { appointments, navigateTo } = useApp();
@@ -46,15 +47,15 @@ export const MyBookingsScreen: React.FC = () => {
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-3">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
+        {/* Search with Reusable Voice Search */}
+        <div className="mb-3">
+          <VoiceSearchInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onChangeValue={setSearch}
+            onClear={() => setSearch('')}
             placeholder="Search by doctor, hospital or ID..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+            searchCategory="doctor"
           />
         </div>
 

@@ -3,6 +3,8 @@ import { useApp } from '../../context/AppContext';
 import { Header } from '../../components/common/Header';
 import { LanguageModal } from '../../components/common/LanguageModal';
 import { LocationModal } from '../../components/common/LocationModal';
+import { SmartLocationSearchModal } from '../../components/location/SmartLocationSearchModal';
+import { LocationSuggestion } from '../../services/indiaLocationService';
 import {
   Search,
   CalendarDays,
@@ -10,7 +12,6 @@ import {
   Store,
   FlaskConical,
   PackagePlus,
-  Video,
   Droplet,
   Flower2,
   FileText,
@@ -26,6 +27,8 @@ import {
   Sparkles,
   HeartHandshake,
   Mic,
+  Compass,
+  Navigation as NavigationIcon,
 } from 'lucide-react';
 import {
   HOSPITALS,
@@ -36,6 +39,7 @@ import {
 import { VoiceSearchModal } from '../../components/common/VoiceSearchModal';
 import { NearbyCareExplorer } from '../../components/common/NearbyCareExplorer';
 import { getNearbyHospitals, getNearbyDoctors, HospitalWithDistance, DoctorWithDistance } from '../../utils/locationHelper';
+import { LiveRouteNavigationModal, NavigationTarget } from '../../components/navigation/LiveRouteNavigationModal';
 
 export const HomeScreen: React.FC = () => {
   const {
@@ -43,13 +47,17 @@ export const HomeScreen: React.FC = () => {
     appointments,
     t,
     currentCity,
+    setCurrentCity,
     currentArea,
+    setCurrentArea,
     requireAuth,
+    showToast,
   } = useApp();
 
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+  const [navTarget, setNavTarget] = useState<NavigationTarget | null>(null);
 
   // Dynamically calculate nearby hospitals & doctors whenever current location changes
   const nearbyHospitals = useMemo(() => {
@@ -65,15 +73,14 @@ export const HomeScreen: React.FC = () => {
     (apt) => apt.bookingStatus === 'UPCOMING'
   );
 
-  // EXACTLY 8 Service Cards specified in prompt:
+  // Active Service Cards:
   // 1. Book Appointment
   // 2. Find Ambulance
   // 3. Medical Store
   // 4. Medical Checkup
   // 5. All Checkups
-  // 6. Online Consultation
-  // 7. Blood Bank
-  // 8. Traditional Healing
+  // 6. Blood Bank
+  // 7. Traditional Healing
   const SERVICES = [
     {
       id: 'book-appointment',
@@ -124,16 +131,6 @@ export const HomeScreen: React.FC = () => {
       iconColor: 'text-indigo-700',
       badge: 'Up to 60% OFF',
       screen: 'all-checkups',
-    },
-    {
-      id: 'online-consultation',
-      title: t('onlineConsultation') || 'Online Consultation',
-      subtitle: 'Video & Audio Call',
-      icon: Video,
-      bgGradient: 'from-violet-50 to-fuchsia-50',
-      iconColor: 'text-violet-700',
-      badge: 'Available Now',
-      screen: 'online-consultation',
     },
     {
       id: 'blood-bank',
@@ -226,7 +223,6 @@ export const HomeScreen: React.FC = () => {
           </div>
         </div>
 
-
         {/* Upcoming Appointment Card (if available) */}
         {upcomingAppointment && (
           <div className="bg-white rounded-2xl p-3.5 border border-teal-200/80 shadow-xs relative overflow-hidden">
@@ -290,7 +286,7 @@ export const HomeScreen: React.FC = () => {
               <p className="text-[11px] text-slate-400">Everything you need for total wellness</p>
             </div>
             <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
-              8 Core Modules
+              Verified Healthcare
             </span>
           </div>
 
@@ -398,13 +394,34 @@ export const HomeScreen: React.FC = () => {
                   <p className="text-[10px] text-slate-400 truncate mt-0.5">{doc.hospitalName}</p>
                 </div>
 
-                <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
+                <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between gap-1">
                   <span className="text-xs font-extrabold text-[#172B4D]">
                     ₹{doc.consultationFee}
                   </span>
-                  <button className="bg-teal-50 hover:bg-teal-100 text-[#087E8B] text-[10px] font-bold px-2 py-1 rounded-lg transition-colors">
-                    Book
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setNavTarget({
+                          id: doc.id,
+                          name: doc.name,
+                          specialty: doc.specialty,
+                          hospitalName: doc.hospitalName,
+                          area: doc.hospitalArea,
+                          city: doc.hospitalCity,
+                          type: 'doctor',
+                        });
+                      }}
+                      className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-black px-1.5 py-1 rounded-lg transition-colors flex items-center gap-0.5"
+                      title="View live road route"
+                    >
+                      Route 📍
+                    </button>
+                    <button className="bg-teal-50 hover:bg-teal-100 text-[#087E8B] text-[10px] font-bold px-2 py-1 rounded-lg transition-colors">
+                      Book
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -523,7 +540,27 @@ export const HomeScreen: React.FC = () => {
                     <span className="text-slate-500">
                       <strong className="text-teal-700">{hosp.bedsAvailable}</strong> Beds
                     </span>
-                    <span className="font-bold text-[#087E8B]">View OPD →</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNavTarget({
+                            id: hosp.id,
+                            name: hosp.name,
+                            area: hosp.area,
+                            city: hosp.city,
+                            address: hosp.address,
+                            type: hosp.type,
+                          });
+                        }}
+                        className="text-[10px] font-black text-amber-800 bg-amber-50 hover:bg-amber-100 px-1.5 py-0.5 rounded-lg border border-amber-300 flex items-center gap-0.5 transition-colors"
+                        title="View live road route"
+                      >
+                        Route 📍
+                      </button>
+                      <span className="font-bold text-[#087E8B]">OPD →</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -604,11 +641,27 @@ export const HomeScreen: React.FC = () => {
       </div>
 
       <LanguageModal isOpen={isLangOpen} onClose={() => setIsLangOpen(false)} />
-      <LocationModal isOpen={isLocationOpen} onClose={() => setIsLocationOpen(false)} />
+      <SmartLocationSearchModal
+        isOpen={isLocationOpen}
+        onClose={() => setIsLocationOpen(false)}
+        onSelectLocation={(loc: LocationSuggestion) => {
+          setCurrentCity(loc.city);
+          if (loc.locality) {
+            setCurrentArea(loc.locality);
+          }
+          showToast(`Location set to ${loc.name}, ${loc.city}`, 'success');
+        }}
+        currentLocationName={currentArea ? `${currentArea}, ${currentCity}` : currentCity}
+      />
       <VoiceSearchModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}
         onSearch={(spokenText) => navigateTo('search', { initialQuery: spokenText })}
+      />
+      <LiveRouteNavigationModal
+        isOpen={Boolean(navTarget)}
+        onClose={() => setNavTarget(null)}
+        target={navTarget}
       />
     </div>
   );

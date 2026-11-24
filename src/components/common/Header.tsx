@@ -9,6 +9,7 @@ import {
   User,
   HeartHandshake,
 } from 'lucide-react';
+import { formatLocationName } from '../../utils/locationHelper';
 
 interface HeaderProps {
   onOpenLanguage?: () => void;
@@ -147,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenLanguage, onOpenLocation }
               {isDetectingLocation ? 'Locating...' : isLiveLocation ? 'Live GPS Location' : 'Location'}
             </span>
             <span className="font-bold text-[11px] text-[#172B4D] max-w-[140px] truncate">
-              {currentArea}, {currentCity}
+              {formatLocationName(currentArea, currentCity)}
             </span>
           </div>
           <ChevronDown className="w-3 h-3 text-slate-400 group-hover:text-teal-700 transition-colors ml-0.5" />

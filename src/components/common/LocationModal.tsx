@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MapPin, Navigation, Search, Check, X, Hospital as HospitalIcon, Stethoscope, ChevronRight } from 'lucide-react';
 import { HOSPITALS, DOCTORS } from '../../data/mockData';
-import { getNearbyHospitals, getNearbyDoctors } from '../../utils/locationHelper';
+import { getNearbyHospitals, getNearbyDoctors, formatLocationName } from '../../utils/locationHelper';
 
 interface LocationModalProps {
   isOpen: boolean;
@@ -101,7 +101,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({ isOpen, onClose })
           <div className="mt-2 flex items-center justify-between">
             <div>
               <p className="text-sm font-extrabold text-[#172B4D] leading-tight">
-                {currentArea}, {currentCity}
+                {formatLocationName(currentArea, currentCity)}
               </p>
               {liveCoordinates ? (
                 <p className="text-[10px] text-teal-700 font-mono mt-0.5">

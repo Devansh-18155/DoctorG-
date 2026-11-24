@@ -3,6 +3,7 @@ import { useApp } from '../../context/AppContext';
 import { SUPPORTED_LANGUAGES } from '../../translations';
 import { LanguageCode } from '../../types';
 import { Search, Check, X, Globe } from 'lucide-react';
+import { VoiceSearchInput } from './VoiceSearchInput';
 
 interface LanguageModalProps {
   isOpen: boolean;
@@ -51,15 +52,16 @@ export const LanguageModal: React.FC<LanguageModalProps> = ({ isOpen, onClose })
           </button>
         </div>
 
-        {/* Search */}
-        <div className="relative mt-3 mb-2">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-          <input
-            type="text"
+        {/* Search with Reusable Voice Search */}
+        <div className="mt-3 mb-2">
+          <VoiceSearchInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onChangeValue={setSearch}
+            onClear={() => setSearch('')}
             placeholder="Search language / भाषा खोजें..."
-            className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500"
+            searchCategory="general"
+            inputClassName="bg-slate-50"
           />
         </div>
 

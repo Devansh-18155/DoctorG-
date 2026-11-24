@@ -127,7 +127,16 @@ export const DevTopBar: React.FC = () => {
 
           {/* Viewport Frame Toggle (Patient view) */}
           {currentRole === 'patient' && (
-            <div className="flex items-center bg-slate-800 rounded-md p-0.5 border border-slate-700">
+            <>
+              <button
+                onClick={() => navigateTo('find-doctor')}
+                className="px-2.5 py-1 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 border border-teal-500/40 rounded-md font-bold text-[11px] flex items-center gap-1 transition-colors"
+                title="Open Doctor Discovery & Clinic Map"
+              >
+                <span>🗺️ Find Doctor Map</span>
+              </button>
+
+              <div className="flex items-center bg-slate-800 rounded-md p-0.5 border border-slate-700">
               <button
                 onClick={() => setViewportMode('mobile-frame')}
                 className={`p-1 rounded flex items-center gap-1 ${
@@ -153,6 +162,7 @@ export const DevTopBar: React.FC = () => {
                 <span className="hidden sm:inline">Full Responsive</span>
               </button>
             </div>
+            </>
           )}
 
           {/* Guest / User Badge */}

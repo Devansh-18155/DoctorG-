@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+.env.production
+.env.development
+.env.local
+.env.*.local
+
+# Gemini / Scratch
+.gemini
+.system_generated

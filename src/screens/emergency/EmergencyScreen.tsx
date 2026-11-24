@@ -12,6 +12,7 @@ import {
   Navigation,
 } from 'lucide-react';
 import { HOSPITALS } from '../../data/mockData';
+import { formatLocationName } from '../../utils/locationHelper';
 
 export const EmergencyScreen: React.FC = () => {
   const { goBack, navigateTo, currentCity, currentArea } = useApp();
@@ -100,7 +101,7 @@ export const EmergencyScreen: React.FC = () => {
             <MapPin className="w-4 h-4 text-rose-600" />
             <div>
               <span className="font-bold text-[#172B4D]">Your Current GPS Location:</span>
-              <p className="text-slate-500 text-[11px]">{currentArea}, {currentCity}</p>
+              <p className="text-slate-500 text-[11px]">{formatLocationName(currentArea, currentCity)}</p>
             </div>
           </div>
           <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-lg">

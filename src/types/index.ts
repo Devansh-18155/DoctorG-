@@ -62,6 +62,8 @@ export interface Hospital {
   type: 'Private' | 'Government';
   address: string;
   city: string;
+  state?: string;
+  pincode?: string;
   area: string;
   distance: string;
   rating: number;
@@ -75,6 +77,8 @@ export interface Hospital {
   facilities: string[];
   bedsAvailable: number;
   about: string;
+  latitude?: number;
+  longitude?: number;
   isDemo: boolean;
 }
 
@@ -87,6 +91,17 @@ export interface Doctor {
   experienceYears: number;
   hospitalId: string;
   hospitalName: string;
+  clinicAddress?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  area?: string;
+  latitude?: number;
+  longitude?: number;
+  openingHours?: string;
+  phone?: string;
+  email?: string;
+  appointmentAvailability?: string;
   consultationFee: number;
   rating: number;
   reviewCount: number;
